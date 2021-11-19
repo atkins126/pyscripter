@@ -2239,16 +2239,6 @@ Var
   WorkArea : TRect;
   Monitor: TMonitor;
 
-  function GetWorkAreaWidth: Integer;
-  begin
-    Result := WorkArea.Right;
-  end;
-
-  function GetWorkAreaHeight: Integer;
-  begin
-    Result := WorkArea.Bottom;
-  end;
-
   function GetParamWidth(const S: string): Integer;
   var
     i: Integer;
@@ -2298,7 +2288,7 @@ Var
     end;
 
     tmpX := x;
-    tmpY := Y + 2;
+    tmpY := Y + MulDiv(2, ActivePPI, 96);;
     tmpWidth := 0;
     tmpHeight := 0;
     case Kind of
@@ -2347,14 +2337,17 @@ Var
       end;
     end;
 
-    if tmpX + tmpWidth > GetWorkAreaWidth then
+    tmpWidth := Min(tmpWidth, MulDiv(WorkArea.Width, 3, 4));
+    tmpHeight := Min(tmpHeight, WorkArea.Height div 2);
+
+    if tmpX + tmpWidth > WorkArea.Right then
     begin
-      tmpX := GetWorkAreaWidth - tmpWidth - MulDiv(5, FForm.CurrentPPI, 96);  //small space buffer
+      tmpX := WorkArea.Right - tmpWidth - MulDiv(5, FForm.CurrentPPI, 96);  //small space buffer
       if tmpX < 0 then
         tmpX := 0;
     end;
 
-    if tmpY + tmpHeight > GetWorkAreaHeight then
+    if tmpY + tmpHeight > WorkArea.Bottom then
     begin
       tmpY := tmpY - tmpHeight - (Form.CurrentEditor  as TCustomSynEdit).LineHeight -
         MulDiv(4, FForm.CurrentPPI, 96);
@@ -3465,67 +3458,66 @@ begin
         if ChangedIndent or ChangedTrailing then
           Editor.Options := TmpOptions;
 
-        Editor.UndoList.AddChange(crAutoCompleteBegin, StartOfBlock, StartOfBlock, '',
-          smNormal);
+        Editor.BeginUndoBlock;
+        try
+          fNoNextKey := True;
+          for j := 1 to Length(Token) do
+            Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
+          BeginningSpaceCount := Editor.DisplayX - 1;
+          if not(eoTabsToSpaces in Editor.Options) and
+            (BeginningSpaceCount >= Editor.TabWidth)
+          then
+            Spacing := StringofChar(#9, BeginningSpaceCount div Editor.TabWidth)
+              + StringofChar(' ', BeginningSpaceCount mod Editor.TabWidth)
+          else
+            Spacing := StringofChar(' ', BeginningSpaceCount);
 
-        fNoNextKey := True;
-        for j := 1 to Length(Token) do
-          Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
-        BeginningSpaceCount := Editor.DisplayX - 1;
-        if not(eoTabsToSpaces in Editor.Options) and
-          (BeginningSpaceCount >= Editor.TabWidth)
-        then
-          Spacing := StringofChar(#9, BeginningSpaceCount div Editor.TabWidth)
-            + StringofChar(' ', BeginningSpaceCount mod Editor.TabWidth)
-        else
-          Spacing := StringofChar(' ', BeginningSpaceCount);
-
-        inc(i);
-        if (i < AutoCompleteList.Count) and
-           (Length(AutoCompleteList[i]) > 0) and
-           (AutoCompleteList[i][1] = '|') then
-        begin
-          inc(i);
-        end;
-        StartOfBlock.Char := -1;
-        StartOfBlock.Line := -1;
-        while (i < AutoCompleteList.Count) and
-              (length(AutoCompleteList[i]) > 0) and
-              (AutoCompleteList[i][1] = '=') do
-        begin
-    {      for j := 0 to PrevSpace - 1 do
-            Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);}
-          Temp := AutoCompleteList[i];
-          for j := 2 to Length(Temp) do begin
-            if (Temp[j] = #9) then
-              Editor.CommandProcessor(ecTab, Temp[j], nil)
-            else
-              Editor.CommandProcessor(ecChar, Temp[j], nil);
-            if (Temp[j] = '|') then
-              StartOfBlock := Editor.CaretXY
-          end;
           inc(i);
           if (i < AutoCompleteList.Count) and
-             (length(AutoCompleteList[i]) > 0) and
-             (AutoCompleteList[i][1] = '=') then
+             (Length(AutoCompleteList[i]) > 0) and
+             (AutoCompleteList[i][1] = '|') then
           begin
-             Editor.CommandProcessor (ecLineBreak,' ',nil);
-             for j := 1 to length(Spacing) do
-               if (Spacing[j] = #9) then
-                 Editor.CommandProcessor(ecTab, #9, nil)
-               else
-                 Editor.CommandProcessor (ecChar, ' ', nil);
+            inc(i);
           end;
-        end;
-        if (StartOfBlock.Char <> -1) and (StartOfBlock.Line <> -1) then begin
-          Editor.CaretXY := StartOfBlock;
-          Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
-        end;
+          StartOfBlock.Char := -1;
+          StartOfBlock.Line := -1;
+          while (i < AutoCompleteList.Count) and
+                (length(AutoCompleteList[i]) > 0) and
+                (AutoCompleteList[i][1] = '=') do
+          begin
+      {      for j := 0 to PrevSpace - 1 do
+              Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);}
+            Temp := AutoCompleteList[i];
+            for j := 2 to Length(Temp) do begin
+              if (Temp[j] = #9) then
+                Editor.CommandProcessor(ecTab, Temp[j], nil)
+              else
+                Editor.CommandProcessor(ecChar, Temp[j], nil);
+              if (Temp[j] = '|') then
+                StartOfBlock := Editor.CaretXY
+            end;
+            inc(i);
+            if (i < AutoCompleteList.Count) and
+               (length(AutoCompleteList[i]) > 0) and
+               (AutoCompleteList[i][1] = '=') then
+            begin
+               Editor.CommandProcessor (ecLineBreak,' ',nil);
+               for j := 1 to length(Spacing) do
+                 if (Spacing[j] = #9) then
+                   Editor.CommandProcessor(ecTab, #9, nil)
+                 else
+                   Editor.CommandProcessor (ecChar, ' ', nil);
+            end;
+          end;
+          if (StartOfBlock.Char <> -1) and (StartOfBlock.Line <> -1) then begin
+            Editor.CaretXY := StartOfBlock;
+            Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
+          end;
 
-        if ChangedIndent or ChangedTrailing then Editor.Options := OrigOptions;
-
-        Editor.UndoList.AddChange(crAutoCompleteEnd, StartOfBlock, StartOfBlock,
-          '', smNormal);
+          if ChangedIndent or ChangedTrailing then Editor.Options := OrigOptions;
+        finally
+          Editor.EndUndoBlock;
+        end;
         fNoNextKey := False;
       finally
         Editor.Lines.EndUpdate;

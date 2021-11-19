@@ -1,9 +1,9 @@
 object CommandsDataModule: TCommandsDataModule
-  OldCreateOrder = False
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
   Height = 392
   Width = 675
+  PixelsPerInch = 96
   object SynEditPrint: TSynEditPrint
     Copies = 1
     Header.DefaultFont.Charset = DEFAULT_CHARSET
@@ -728,7 +728,6 @@ object CommandsDataModule: TCommandsDataModule
           '    sys.path.remove(os.path.dirname(sys.executable))'
           'except:'
           '    pass'
-          'sys.path.insert(0, "")'
           ''
           'import warnings'
           'warnings.simplefilter("ignore", DeprecationWarning)'
@@ -2088,7 +2087,7 @@ object CommandsDataModule: TCommandsDataModule
     end
     object actFileSaveAs: TAction
       Category = 'File'
-      Caption = 'Save &As...'
+      Caption = 'Sav&e As...'
       Enabled = False
       HelpContext = 310
       Hint = 'Save As|Save active file under different name'
@@ -2418,7 +2417,7 @@ object CommandsDataModule: TCommandsDataModule
     end
     object actFindInFiles: TAction
       Category = 'Search'
-      Caption = '&Find in Files...'
+      Caption = 'Find &in Files...'
       HelpContext = 330
       Hint = 'Search in Files|Search for a string in Files'
       ImageIndex = 59
@@ -2597,7 +2596,7 @@ object CommandsDataModule: TCommandsDataModule
     end
     object actUnitTestWizard: TAction
       Category = 'Tools'
-      Caption = '&Unit Test Wizard...'
+      Caption = 'Unit Test &Wizard...'
       HelpContext = 930
       Hint = 'Unit test wizard|Create unit test for active module'
       ImageIndex = 68
@@ -2664,7 +2663,7 @@ object CommandsDataModule: TCommandsDataModule
     end
     object actFileReload: TAction
       Category = 'File'
-      Caption = '&Reload'
+      Caption = 'Re&load'
       Enabled = False
       HelpContext = 310
       Hint = 'Reload|Reload active file'
@@ -2778,7 +2777,7 @@ object CommandsDataModule: TCommandsDataModule
     end
     object actToolsEditStartupScripts: TAction
       Category = 'Tools'
-      Caption = 'Edit Start&up Scripts'
+      Caption = 'Edit &Startup Scripts'
       HelpContext = 350
       HelpType = htContext
       Hint = 'Edit PyScripter initialization files'
@@ -2915,6 +2914,14 @@ object CommandsDataModule: TCommandsDataModule
       ImageIndex = 90
       ImageName = 'Link'
       OnExecute = actDonateExecute
+    end
+    object actToolsRestartLS: TAction
+      Category = 'Tools'
+      Caption = 'Restart &Language Server'
+      HelpContext = 350
+      HelpType = htContext
+      Hint = 'Restart the Language Server'
+      OnExecute = actToolsRestartLSExecute
     end
   end
   object SynWebEsSyn: TSynWebEsSyn
@@ -3963,6 +3970,15 @@ object CommandsDataModule: TCommandsDataModule
           'V14.5z"/>'#13#10'</svg>'#13#10
       end
       item
+        IconName = 'Lock'
+        SVGText = 
+          '<svg viewBox="0 0 24 24">'#13#10#9'<path'#13#10#9#9'd="M12,17C10.89,17 10,16.1 ' +
+          '10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18' +
+          ',20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22' +
+          ' 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 1' +
+          '7,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />'#13#10'</svg>'
+      end
+      item
         IconName = 'MessagesWin'
         SVGText = 
           '<svg viewBox="0 0 32 32">'#13#10'<path fill="#FFCE00" d="M20.5,4v10.5H' +
@@ -4914,6 +4930,15 @@ object CommandsDataModule: TCommandsDataModule
           '0,0.7-0.7,1.4-1.4,1.4s-1.4-0.7-1.4-1.4C195.2,329.8,195.9,329.2,1' +
           '96.6,329.2z M206.7,354.6h-20.2V332h2.9'#13#10#9#9#9'v4.2h14.4V332h2.9V354' +
           '.6z"/>'#13#10#9'</g>'#13#10'</svg>'#13#10
+      end
+      item
+        IconName = 'Lock'
+        SVGText = 
+          '<svg viewBox="0 0 24 24">'#13#10#9'<path'#13#10#9#9'd="M12,17C10.89,17 10,16.1 ' +
+          '10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18' +
+          ',20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22' +
+          ' 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 1' +
+          '7,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />'#13#10'</svg>'
       end
       item
         IconName = 'Tools'

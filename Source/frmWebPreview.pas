@@ -95,8 +95,7 @@ uses
   StringResources,
   VarPyth,
   frmCommandOutput,
-  cParameters,
-  JvCreateProcess;
+  cParameters;
 
 {$R *.dfm}
 
@@ -210,7 +209,7 @@ begin
       StyledMessageDlg(_(SNoJupyter), mtError, [mbOK], 0);
       Abort;
     end;
-    if OutputWindow.JvCreateProcess.State <> psReady then begin
+    if OutputWindow.IsRunning then begin
       StyledMessageDlg(_(SExternalProcessRunning), mtError, [mbOK], 0);
       Abort;
     end;
@@ -227,7 +226,6 @@ begin
       ParseTraceback := False;
       CaptureOutput := True;
       ConsoleHidden := True;
-      WaitForTerminate := True;
     end;
     OutputWindow.ExecuteTool(ExternalTool);
   end;

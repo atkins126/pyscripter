@@ -5,7 +5,7 @@ interface
 
 Const
   // File Filters
-  sPythonFileFilter = 'Python Files (*.py;*.pyw)|*.py;*.pyw';
+  sPythonFileFilter = 'Python Files (*.py;*.pyw;*.pyi)|*.py;*.pyw;*.pyi';
   sCythonFileFilter = 'Cython Files (*.pyx*.pxd;*.pxi)|*.pyx;*.pxd;*.pxi';
   sHTMLFileFilter = 'HTML Documents (*.htm;*.html)|*.htm;*.html';
   sXMLFileFilter = 'XML Files (*.xml;*.xsd;*.xsl;*.xslt;*.dtd)|*.xml;*.xsd;*.xsl;*.xslt;*.dtd';
@@ -171,16 +171,15 @@ Const
   SCommandLineMsg  = 'Command Line : %s' + sLineBreak;
   SEngineActive = '*** %s Python engine is active ***';
   SInterpreterNA = 'The internal Python interpreter is not available';
-  SPythonLoadError =
-  'PyScripter could not load a Python engine' + SLineBreak +
-  '**Before** using PyScripter, you must ensure that a version of Python' + SLineBreak +
-  'greater or equal to 2.7 is installed on your machine. If you do not have one' + SLineBreak +
-  'installed, you can download one from http://www.python.org/.' + SLineBreak +  SLineBreak +
-  'The 64-bit version of PyScripter (x64) works only on 64-bit Windows **and**' + SLineBreak +
-  'with 64-bit versions of Python. The 32-bit version of PyScripter works on both' + SLineBreak +
-  '32-bit and 64-bit Windows with 32-bit versions of Python.';
-  SPythonFindError =
-  'PyScripter could not find a usable Python installation at the specified path.' + SLineBreak +
+  SPythonLoadError = 'PyScripter could not load a Python engine.' + SLineBreak +
+  '**Before** using PyScripter, you must ensure that a version of Python ' +
+  'greater or equal to 3.6 is installed on your machine.' + SLineBreak +
+  'If you do not have one installed, you can download one from http://www.python.org/.'
+  + SLineBreak +  SLineBreak +
+  'The 64-bit version of PyScripter (x64) works only on 64-bit Windows **and** with 64-bit versions of Python.'
+   + SLineBreak +
+  'The 32-bit version of PyScripter works on both 32-bit and 64-bit Windows with 32-bit versions of Python.';
+  SPythonFindError =  'PyScripter could not find a usable Python installation at the specified path.' + SLineBreak +
   'Note that the 64-bit version of PyScripter (x64) works only on 64-bit Windows **and**' + SLineBreak +
   'with 64-bit versions of Python. The 32-bit version of PyScripter works on both' + SLineBreak +
   '32-bit and 64-bit Windows with 32-bit versions of Python.';
@@ -355,7 +354,6 @@ Const
   SProcessRunning            = 'One process is still running, stop it first.';
   SPrintCommandLine          = 'Command line: %s';
   SPrintWorkingDir           = 'Working directory: ';
-  SPrintTimeOut              = 'Timeout: %d ms';
   SExternalToolStillRunning  = 'The External Tool "%s" is still running. Do you want to terminate it?';
 
   // Editor
@@ -455,6 +453,7 @@ Const
   SParsedMethodCodeHint =  '<b>Method <font color="$FF8844">%s.%s(%s)</font></b>%s';
   SFunctionParameterCodeHint = '<b>Function Parameter <font color="$FF8844">%s</font>'+
                           '</b> of function <font color="$FF8844">%s</font>%s';
+  SVariableCodeHint = '<b>Variable <font color="$FF8844">%s</font>%s%s';
   SLocalVariableCodeHint = '<b>Local variable <font color="$FF8844">%s</font>'+
                           '</b> of function <font color="$FF8844">%s</font>%s';
   SGlobalVariableCodeHint = '<b>Global variable <font color="$FF8844">%s</font>'+

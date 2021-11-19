@@ -88,6 +88,8 @@ inherited CodeExplorerWindow: TCodeExplorerWindow
           OnInitNode = ExplorerTreeInitNode
           OnKeyPress = ExplorerTreeKeyPress
           OnScroll = ExplorerTreeScroll
+          Touch.InteractiveGestures = [igPan, igPressAndTap]
+          Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
           Columns = <
             item
               Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus, coStyleColor]
@@ -107,6 +109,7 @@ inherited CodeExplorerWindow: TCodeExplorerWindow
       Hint = 'Expand all nodes'
       HelpContext = 430
       ImageIndex = 0
+      ImageName = 'Expand'
       OnClick = mnExpandAllClick
     end
     object nCollapseAll: TSpTBXItem
@@ -114,6 +117,7 @@ inherited CodeExplorerWindow: TCodeExplorerWindow
       Hint = 'Collapse all nodes'
       HelpContext = 430
       ImageIndex = 1
+      ImageName = 'Collapse'
       OnClick = nCollapseAllClick
     end
     object SpTBXSeparatorItem1: TSpTBXSeparatorItem
@@ -164,6 +168,7 @@ inherited CodeExplorerWindow: TCodeExplorerWindow
       Hint = 'Highlight References'
       HelpContext = 430
       ImageIndex = 2
+      ImageName = 'Highlight'
       OnClick = mnHighlightClick
     end
   end

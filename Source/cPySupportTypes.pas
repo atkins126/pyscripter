@@ -30,6 +30,9 @@ type
 const
   EngineTypeName : array [TPythonEngineType] of string =
     ('Internal', 'Remote', 'Remote TK', 'Remote Wx', 'SSH');
+  FilePosInfoFormat : string = '%s (%d:%d)';
+  FilePosInfoRegExpr : string = '(.+) \((\d+):(\d+)\)$';
+
 
 type
   TEditorPos = record
@@ -144,7 +147,6 @@ begin
     ParseTraceback := True;
     CaptureOutput := True;
     ConsoleHidden := True;
-    WaitForTerminate := True;
   end;
 end;
 

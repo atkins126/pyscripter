@@ -66,10 +66,8 @@ uses
   dlgToolProperties in 'dlgToolProperties.pas' {ToolProperties},
   frmCommandOutput in 'frmCommandOutput.pas' {OutputWindow},
   frmFunctionList in 'frmFunctionList.pas' {FunctionListWindow},
-  cPythonSourceScanner in 'cPythonSourceScanner.pas',
   uCommonFunctions in 'uCommonFunctions.pas',
   StringResources in 'StringResources.pas',
-  cRefactoring in 'cRefactoring.pas',
   SynCompletionProposal in 'SynCompletionProposal.pas',
   frmRegExpTester in 'frmRegExpTester.pas' {RegExpTesterWindow},
   cCodeHint in 'cCodeHint.pas',
@@ -99,7 +97,6 @@ uses
   dlgSynEditOptions in 'dlgSynEditOptions.pas' {fmEditorOptionsDialog: TForm},
   JvDockSupportControl in 'JvDockSupportControl.pas',
   JvDockVIDStyle in 'JvDockVIDStyle.pas',
-  JvCreateProcess in 'JvCreateProcess.pas',
   cCodeCompletion in 'cCodeCompletion.pas',
   dlgStyleSelector in 'dlgStyleSelector.pas' {StyleSelectorForm},
   cVirtualStringTreeHelper in 'cVirtualStringTreeHelper.pas',
@@ -118,7 +115,11 @@ uses
   JvDockAdvTree in 'JvDockAdvTree.pas',
   JvDockSupportProc in 'JvDockSupportProc.pas',
   JvDockTree in 'JvDockTree.pas',
-  JvDockVSNetStyleSpTBX in 'JvDockVSNetStyleSpTBX.pas';
+  JvDockVSNetStyleSpTBX in 'JvDockVSNetStyleSpTBX.pas',
+  LspClient in 'LspClient.pas',
+  LspUtils in 'LspUtils.pas',
+  SynEditLsp in 'SynEditLsp.pas',
+  JediLspClient in 'JediLspClient.pas';
 
 {$R *.RES}
 {$R WebCopyAvi.RES}

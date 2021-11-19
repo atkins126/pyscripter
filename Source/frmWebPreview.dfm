@@ -7,9 +7,8 @@ object WebPreviewForm: TWebPreviewForm
   ClientWidth = 463
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object WebBrowser: TWebBrowser
     Left = 0
     Top = 30
@@ -45,11 +44,13 @@ object WebPreviewForm: TWebPreviewForm
       object ToolButtonBack: TSpTBXItem
         Hint = 'Go Back'
         ImageIndex = 0
+        ImageName = 'Back'
         OnClick = ToolButtonBackClick
       end
       object ToolButtonForward: TSpTBXItem
         Hint = 'Go Forward'
         ImageIndex = 1
+        ImageName = 'Forward'
         OnClick = ToolButtonForwardClick
       end
       object TBXSeparatorItem1: TSpTBXSeparatorItem
@@ -57,6 +58,7 @@ object WebPreviewForm: TWebPreviewForm
       object TBXItem3: TSpTBXItem
         Hint = 'Stop'
         ImageIndex = 2
+        ImageName = 'Cancel'
         OnClick = ToolButtonStopClick
       end
       object TBXSeparatorItem2: TSpTBXSeparatorItem
@@ -64,16 +66,19 @@ object WebPreviewForm: TWebPreviewForm
       object TBXItem4: TSpTBXItem
         Hint = 'Page Setup'
         ImageIndex = 3
+        ImageName = 'PageSetup'
         OnClick = ToolButtonPageSetupClick
       end
       object TBXItem6: TSpTBXItem
         Hint = 'Print Preview'
         ImageIndex = 4
+        ImageName = 'Preview'
         OnClick = ToolButtonPrintPreviewClick
       end
       object TBXItem5: TSpTBXItem
         Hint = 'Print'
         ImageIndex = 5
+        ImageName = 'Print'
         OnClick = ToolButtonPrintClick
       end
       object TBXSeparatorItem4: TSpTBXSeparatorItem
@@ -81,54 +86,46 @@ object WebPreviewForm: TWebPreviewForm
       object TBXItem7: TSpTBXItem
         Hint = 'Save'
         ImageIndex = 6
+        ImageName = 'Save'
         OnClick = ToolButtonSaveClick
       end
     end
   end
   object BrowserImages: TVirtualImageList
-    DisabledGrayscale = False
-    DisabledSuffix = '_Disabled'
     Images = <
       item
         CollectionIndex = 0
         CollectionName = 'Browser\Back'
-        Disabled = False
         Name = 'Back'
       end
       item
         CollectionIndex = 2
         CollectionName = 'Browser\Forward'
-        Disabled = False
         Name = 'Forward'
       end
       item
         CollectionIndex = 1
         CollectionName = 'Browser\Cancel'
-        Disabled = False
         Name = 'Cancel'
       end
       item
         CollectionIndex = 3
         CollectionName = 'Browser\PageSetup'
-        Disabled = False
         Name = 'PageSetup'
       end
       item
         CollectionIndex = 4
         CollectionName = 'Browser\Preview'
-        Disabled = False
         Name = 'Preview'
       end
       item
         CollectionIndex = 5
         CollectionName = 'Browser\Print'
-        Disabled = False
         Name = 'Print'
       end
       item
         CollectionIndex = 6
         CollectionName = 'Browser\Save'
-        Disabled = False
         Name = 'Save'
       end>
     ImageCollection = CommandsDataModule.icBrowserImages

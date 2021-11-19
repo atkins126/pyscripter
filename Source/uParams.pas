@@ -84,7 +84,7 @@ begin
   Result:= '';
   Editor := GI_PyIDEServices.ActiveEditor;
   if Assigned(Editor) then
-    Result:= Editor.GetFileNameOrTitle;
+    Result:= Editor.FileId;
 end;
 
 function GetActiveScript: string;
@@ -146,7 +146,7 @@ begin
   Result:= '';
   if (AFileName = '') or SameText('ActiveDoc', AFileName) then
     AEditor:= GI_ActiveEditor
-  else AEditor:= GI_EditorFactory.GetEditorByNameOrTitle(AFileName);
+  else AEditor:= GI_EditorFactory.GetEditorByFileId(AFileName);
   if Assigned(AEditor) then
     Result:= AEditor.GetSynEdit.LineText;
 end;
@@ -158,7 +158,7 @@ begin
   Result:= '0';
   if (AFileName = '') or SameText('ActiveDoc', AFileName) then
     AEditor:= GI_ActiveEditor
-  else AEditor:= GI_EditorFactory.GetEditorByNameOrTitle(AFileName);
+  else AEditor:= GI_EditorFactory.GetEditorByFileId(AFileName);
   if Assigned(AEditor) then
     Result:= AEditor.GetSynEdit.CaretY.ToString;
 end;
@@ -440,7 +440,7 @@ var
 begin
   Result:= '';
   // look in open files
-  AEditor:= GI_EditorFactory.GetEditorByNameOrTitle(AFileName);
+  AEditor:= GI_EditorFactory.GetEditorByFileId(AFileName);
   if Assigned(AEditor) then
     Result:= AEditor.GetSynEdit.Text
   else begin
@@ -604,17 +604,11 @@ begin
 
     (* parameters, valid for current Windows configuration *)
     // Python Paths etc.
-    RegisterParameter('Python33Dir', GetPythonDir('3.3'), nil);
-    RegisterParameter('Python34Dir', GetPythonDir('3.4'), nil);
-    RegisterParameter('Python35Dir', GetPythonDir('3.5'), nil);
     RegisterParameter('Python36Dir', GetPythonDir('3.6'), nil);
     RegisterParameter('Python37Dir', GetPythonDir('3.7'), nil);
     RegisterParameter('Python38Dir', GetPythonDir('3.8'), nil);
     RegisterParameter('Python39Dir', GetPythonDir('3.9'), nil);
     RegisterParameter('Python310Dir', GetPythonDir('3.10'), nil);
-    RegisterParameter('Python33Exe', '$[PYTHON33DIR]python.exe', nil);
-    RegisterParameter('Python34Exe', '$[PYTHON34DIR]python.exe', nil);
-    RegisterParameter('Python35Exe', '$[PYTHON35DIR]python.exe', nil);
     RegisterParameter('Python36Exe', '$[PYTHON36DIR]python.exe', nil);
     RegisterParameter('Python37Exe', '$[PYTHON37DIR]python.exe', nil);
     RegisterParameter('Python38Exe', '$[PYTHON38DIR]python.exe', nil);
@@ -708,17 +702,11 @@ begin
   with Parameters do begin
     (* parameters, valid for current Windows configuration *)
     // Python Paths etc.
-    UnRegisterParameter('Python33Dir');
-    UnRegisterParameter('Python34Dir');
-    UnRegisterParameter('Python35Dir');
     UnRegisterParameter('Python36Dir');
     UnRegisterParameter('Python37Dir');
     UnRegisterParameter('Python38Dir');
     UnRegisterParameter('Python39Dir');
     UnRegisterParameter('Python310Dir');
-    UnRegisterParameter('Python33Exe');
-    UnRegisterParameter('Python34Exe');
-    UnRegisterParameter('Python35Exe');
     UnRegisterParameter('Python36Exe');
     UnRegisterParameter('Python37Exe');
     UnRegisterParameter('Python38Exe');

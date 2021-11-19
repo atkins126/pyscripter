@@ -132,6 +132,7 @@ begin
       CallStackView.Clear;
       // OutputDebugString('Call Stack filled');
       CallStackView.RootNodeCount := fActiveThread.CallStack.Count;  // Fills the View
+      var Py := SafePyEngine;
       CallStackView.ValidateNode(nil, True);
     finally
       CallStackView.EndUpdate;
@@ -145,7 +146,7 @@ begin
 
       // Now Show the Current debugger position
       FrameData := FirstNode.GetData;
-      Editor := GI_EditorFactory.GetEditorByNameOrTitle(FrameData.FileName);
+      Editor := GI_EditorFactory.GetEditorByFileId(FrameData.FileName);
       if Assigned(Editor) then
         PyControl.CurrentPos := TEditorPos.NPos(Editor, FrameData.Line);
     end;

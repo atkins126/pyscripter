@@ -84,8 +84,6 @@ type
     fII : Variant;  // Python VarPyth wrapper to the interactive interpreter
     fDebugger : Variant;
     fOldargv : Variant;
-  protected
-    procedure CreateMainModule; override;
   public
     constructor Create(II : Variant);
     function CreateDebugger: TPyBaseDebugger; override;
@@ -183,7 +181,6 @@ uses
   VarPyth,
   StringResources,
   uCommonFunctions,
-  cRefactoring,
   cPyScripterSettings,
   cParameters,
   cPyControl,
@@ -772,7 +769,7 @@ begin
   Assert(PyControl.DebuggerState = dsPaused);
   // Set Temporary breakpoint
   SetDebuggerBreakPoints;  // So that this one is not cleared
-  FName := InternalInterpreter.ToPythonFileName(Editor.GetFileNameOrTitle);
+  FName := InternalInterpreter.ToPythonFileName(Editor.FileId);
   var Py := SafePyEngine;
   InternalInterpreter.Debugger.set_break(VarPythonCreate(FName), ALine, 1);
 
@@ -846,7 +843,7 @@ begin
   begin
     CanBreak :=  (LineNo > 0) and
       (not PyIDEOptions.TraceOnlyIntoOpenFiles or
-       Assigned(GI_EditorFactory.GetEditorByNameOrTitle(FName))) and
+       Assigned(GI_EditorFactory.GetEditorByFileId(FName))) and
        GI_PyIDEServices.ShowFilePosition(FName, LineNo, 1, 0, True, False);
   end);
 
@@ -912,7 +909,6 @@ end;
 procedure TPyInternalDebugger.UserYield(Sender: TObject; PSelf, Args: PPyObject;
   var Result: PPyObject);
 begin
-//  PyControl.DoYield(False);
   if fDebuggerCommand = dcAbort then begin
     InternalInterpreter.Debugger.set_quit();
     TThread.Synchronize(nil, procedure
@@ -942,7 +938,7 @@ begin
   var
     FName : string;
   begin
-    FName := InternalInterpreter.ToPythonFileName(Editor.GetFileNameOrTitle);
+    FName := InternalInterpreter.ToPythonFileName(Editor.FileId);
     for var I := 0 to Editor.BreakPoints.Count - 1 do begin
       var BreakPoint := TBreakPoint(Editor.BreakPoints[I]);
       if not BreakPoint.Disabled then begin
@@ -971,7 +967,7 @@ begin
   begin
     with Editor do begin
       if not HasPythonFile then Exit;
-      SFName := InternalInterpreter.ToPythonFileName(GetFileNameOrTitle);
+      SFName := InternalInterpreter.ToPythonFileName(FileId);
       if SFName.StartsWith('<') then
       begin
         FName := SFName;
@@ -1023,14 +1019,6 @@ end;
 function TPyInternalInterpreter.CreateDebugger: TPyBaseDebugger;
 begin
   Result := TPyInternalDebugger.Create;
-end;
-
-procedure TPyInternalInterpreter.CreateMainModule;
-var
-  Py: IPyEngineAndGIL;
-begin
-  Py := SafePyEngine;
-  fMainModule := TModuleProxy.CreateFromModule(VarPyth.MainModule, self);
 end;
 
 function TPyInternalInterpreter.EvalCode(const Expr: string): Variant;
@@ -1090,7 +1078,7 @@ begin
 
   GI_PyIDEServices.Messages.ClearMessages;
 
-  Editor := GI_EditorFactory.GetEditorByNameOrTitle(ARunConfig.ScriptName);
+  Editor := GI_EditorFactory.GetEditorByFileId(ARunConfig.ScriptName);
   if Assigned(Editor) then begin
     Source := CleanEOLs(Editor.EncodedText) + AnsiString(#10);
   end else begin
@@ -1182,14 +1170,14 @@ begin
   //Compile
   RunConfiguration := TRunConfiguration.Create;
   try
-    RunConfiguration.ScriptName := Editor.GetFileNameOrTitle;
+    RunConfiguration.ScriptName := Editor.FileId;
     Code := Compile(RunConfiguration);
   finally
     RunConfiguration.Free;
   end;
 
   // Add the path of the imported script to the Python Path
-  Path := ToPythonFileName(Editor.GetFileNameOrTitle);
+  Path := ToPythonFileName(Editor.FileId);
   Path := IfThen(Path.StartsWith('<'), '', ExtractFileDir(Path));
   if Path.Length > 1 then begin
     PythonPathAdder := AddPathToPythonPath(Path, False);
@@ -1470,7 +1458,7 @@ begin
 
   TThread.Synchronize(nil, procedure
   begin
-    FName := ToPythonFileName(Editor.GetFileNameOrTitle);
+    FName := ToPythonFileName(Editor.FileId);
     Source := CleanEOLs(Editor.EncodedText)+AnsiString(#10);
   end);
 

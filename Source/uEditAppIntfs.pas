@@ -18,7 +18,9 @@ uses
   Vcl.Forms,
   Vcl.ImgList,
   JvAppStorage,
+  JclNotify,
   PythonEngine,
+  PythonVersions,
   SynEdit,
   SpTBXItem,
   SpTBXTabs;
@@ -77,13 +79,12 @@ type
     function GetEditorState: string;
     function GetFileName: string;
     function GetFileTitle: string;
-    function GetFileNameOrTitle: string;
+    function GetFileId: string;
     function GetModified: Boolean;
     function GetFileEncoding : TFileSaveFormat;
     function GetForm : TForm;
+    function GetDocSymbols: TObject;
     function GetEncodedText : AnsiString;
-    function GetSourceScanner : IInterface;
-    function GetCodeExplorerData : IInterface;
     function GetTabControlIndex : integer;
     function GetReadOnly : Boolean;
     function GetRemoteFileName: string;
@@ -98,20 +99,21 @@ type
     procedure SplitEditorHorizontally;
     procedure SplitEditorVertrically;
     procedure Retranslate;
-    property FileName : string read GetFileName;
+    procedure RefreshSymbols;
+    property FileName: string read GetFileName;
     property RemoteFileName : string read GetRemoteFileName;
-    property SSHServer : string read GetSSHServer;
-    property FileTitle : string read GetFileTitle;
-    property Modified : Boolean read GetModified;
-    property SynEdit : TSynEdit read GetSynEdit;
-    property SynEdit2 : TSynEdit read GetSynEdit2;
-    property ActiveSynEdit : TSynEdit read GetActiveSynEdit;
-    property BreakPoints : TObjectList read GetBreakPoints;
-    property FileEncoding : TFileSaveFormat read GetFileEncoding write SetFileEncoding;
-    property EncodedText : AnsiString read GetEncodedText;
-    property Form : TForm read GetForm;
-    property SourceScanner : IInterface read GetSourceScanner;  // IAsyncSourceScanner
-    property CodeExplorerData : IInterface read GetCodeExplorerdata; //ICodeExplorerData
+    property FileId: string read GetFileId;
+    property SSHServer: string read GetSSHServer;
+    property FileTitle: string read GetFileTitle;
+    property Modified: Boolean read GetModified;
+    property SynEdit: TSynEdit read GetSynEdit;
+    property SynEdit2: TSynEdit read GetSynEdit2;
+    property ActiveSynEdit: TSynEdit read GetActiveSynEdit;
+    property BreakPoints: TObjectList read GetBreakPoints;
+    property FileEncoding: TFileSaveFormat read GetFileEncoding write SetFileEncoding;
+    property EncodedText: AnsiString read GetEncodedText;
+    property Form: TForm read GetForm;
+    property DocSymbols: TObject read GetDocSymbols;
     property TabControlIndex : integer read GetTabControlIndex;
     property ReadOnly : Boolean read GetReadOnly write SetReadOnly;
   end;
@@ -124,7 +126,7 @@ type
     function GetEditorCount: integer;
     function GetEditor(Index: integer): IEditor;
     function GetEditorByName(const Name : string): IEditor;
-    function GetEditorByNameOrTitle(const Name : string): IEditor;
+    function GetEditorByFileId(const Name : string): IEditor;
     procedure RemoveEditor(AEditor: IEditor);
     function RegisterViewFactory(ViewFactory : IEditorViewFactory): integer;
     function GetViewFactoryCount: integer;
@@ -222,6 +224,7 @@ type
       If want the active editor with focus then use GI_ActiveEditor
     }
     function GetActiveEditor : IEditor;
+    function GetIsClosing: Boolean;
     procedure WriteStatusMsg(const S: string);
     function ShowFilePosition(FileName : string; Line: integer =0;
       Offset : integer = 1; SelLen : integer = 0;
@@ -238,6 +241,7 @@ type
     function GetLocalAppStorage: TJvCustomAppStorage;
     procedure MRUAddEditor(Editor: IEditor);
     property ActiveEditor: IEditor read GetActiveEditor;
+    property IsClosing: Boolean read GetIsClosing;
     property Messages: IMessageServices read GetMessageServices;
     property UnitTests: IUnitTestServices read GetUnitTestServices;
     property Layouts: IIDELayouts read GetIDELayouts;
@@ -250,7 +254,12 @@ type
     function PythonLoaded: Boolean;
     function Running: boolean;
     function Inactive: boolean;
+    function GetPythonVersion: TPythonVersion;
+    function GetOnPythonVersionChange: TJclNotifyEventBroadcast;
     function AddPathToInternalPythonPath(const Path: string): IInterface;
+    property PythonVersion: TPythonVersion read GetPythonVersion;
+    property OnPythonVersionChange: TJclNotifyEventBroadcast
+      read GetOnPythonVersionChange;
   end;
 
   TPyInterpreterPropmpt = (pipNormal, pipDebug, pipPostMortem);

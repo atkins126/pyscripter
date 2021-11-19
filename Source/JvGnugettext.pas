@@ -2007,8 +2007,9 @@ begin
 
         Count := GetPropList(AnObject, PropList);
         try
-          if ObjectHasAssignedAction(AnObject, PropList, Count) then
-            Continue;
+// Fix #1133
+//          if ObjectHasAssignedAction(AnObject, PropList, Count) then
+//            Continue;
 
           for j := 0 to Count - 1 do begin
             PropInfo := PropList[j];
@@ -2019,9 +2020,11 @@ begin
             {$ENDIF}
               continue;
             UPropName:=uppercase(string(PropInfo^.Name));
+
             // Ignore properties that are meant to be ignored
             if ((currentcm=nil) or (not currentcm.PropertiesToIgnore.Find(UPropName,i))) and
                (not TP_IgnoreList.Find(Name+'.'+UPropName,i)) and
+               IsStoredProp(AnObject, PropInfo) and
                (not ObjectPropertyIgnoreList.Find(UPropName,i)) then begin
               TranslateProperty (AnObject,PropInfo,TodoList,TextDomain);
             end;  // if
@@ -2856,11 +2859,11 @@ begin
 end;
 
 destructor TFileLocator.Destroy;
+Var
+  Idx:integer;
 begin
-  while filelist.count<>0 do begin
-    filelist.Objects[0].Free;
-    filelist.Delete (0);
-  end;
+  for Idx := 0 to filelist.Count-1 do
+    FileList.Objects[Idx].Free;
   FreeAndNil (filelist);
   FreeAndNil (MoFiles);
   FreeAndNil (MoFilesCS);

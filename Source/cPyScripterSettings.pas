@@ -117,7 +117,6 @@ type
     fCompleteWithWordBreakChars: Boolean;
     fCompleteWithOneEntry:Boolean;
     fDisplayPackageNames:Boolean;
-    fCheckSyntaxLineLimit : integer;
     fNoOfRecentFiles : integer;
     fCodeFoldingEnabled : boolean;
     fCodeFolding : TSynCodeFolding;
@@ -133,6 +132,7 @@ type
     fAlwaysUseSockets: Boolean;
     fTrimTrailingSpacesOnSave: Boolean;
     fTraceOnlyIntoOpenFiles: Boolean;
+    fLspDebug: Boolean;
     function GetPythonFileExtensions: string;
     procedure SetAutoCompletionFont(const Value: TFont);
   protected
@@ -211,7 +211,7 @@ type
     property MarkExecutableLines : Boolean read fMarkExecutableLines
       write fMarkExecutableLines default False;
     property CheckSyntaxAsYouType : Boolean read fCheckSyntaxAsYouType
-      write fCheckSyntaxAsYouType default True;
+      write fCheckSyntaxAsYouType default False;
     property FileExplorerContextMenu : Boolean read fFileExplorerContextMenu
       write fFileExplorerContextMenu default True;
     property NewFileLineBreaks : TSynEditFileFormat read fNewFileLineBreaks
@@ -278,8 +278,6 @@ type
       write fCompleteWithOneEntry default False;
     property DisplayPackageNames : Boolean read fDisplayPackageNames
       write fDisplayPackageNames default True;
-    property CheckSyntaxLineLimit : integer read fCheckSyntaxLineLimit
-      write fCheckSyntaxLineLimit default 1000;
     property NoOfRecentFiles : integer read fNoOfRecentFiles
       write fNoOfRecentFiles default 8;
     property CodeFoldingEnabled : Boolean read fCodeFoldingEnabled
@@ -304,6 +302,7 @@ type
       write fTrimTrailingSpacesOnSave default True;
     property TraceOnlyIntoOpenFiles : Boolean read fTraceOnlyIntoOpenFiles
       write fTraceOnlyIntoOpenFiles default False;
+    property LspDebug: Boolean read fLspDebug write fLspDebug default false;
   end;
 {$METHODINFO OFF}
 
@@ -313,6 +312,7 @@ type
     class var OptionsFileName: string;
     class var ColorThemesFilesDir: string;
     class var StylesFilesDir: string;
+    class var LspServerPath: string;
     class var EngineInitFile: string;
     class var PyScripterInitFile: string;
     class var ShellImages: TCustomImageList;
@@ -433,7 +433,6 @@ begin
       Self.fCompleteWithWordBreakChars := CompleteWithWordBreakChars;
       Self.fCompleteWithOneEntry := CompleteWithOneEntry;
       Self.fDisplayPackageNames := DisplayPackageNames;
-      Self.fCheckSyntaxLineLimit := CheckSyntaxLineLimit;
       Self.fNoOfRecentFiles := NoOfRecentFiles;
       Self.fCodeFoldingEnabled := CodeFoldingEnabled;
       Self.fInternalInterpreterHidden := InternalInterpreterHidden;
@@ -448,6 +447,7 @@ begin
       Self.fAlwaysUseSockets := AlwaysUseSockets;
       Self.fTrimTrailingSpacesOnSave := TrimTrailingSpacesOnSave;
       Self.fTraceOnlyIntoOpenFiles := TraceOnlyIntoOpenFiles;
+      Self.fLspDebug := LspDebug;
     end
   else
     inherited;
@@ -489,12 +489,12 @@ begin
   fAutoCheckForUpdates := True;
   fDaysBetweenChecks := 7;
   fMaskFPUExceptions := True;
-  fSpecialPackages := 'os';
+  fSpecialPackages := 'os, numpy, pandas';
   fShowCodeHints := True;
   fShowDebuggerHints := True;
   fAutoCompleteBrackets := True;
   fMarkExecutableLines := False;
-  fCheckSyntaxAsYouType := True;
+  fCheckSyntaxAsYouType := False;
   fFileExplorerContextMenu := True;
   fNewFileLineBreaks := sffDos;
   fNewFileEncoding := sf_UTF8_NoBOM;
@@ -529,7 +529,6 @@ begin
   fCompleteWithWordBreakChars := False;
   fCompleteWithOneEntry := False;
   fDisplayPackageNames := True;
-  fCheckSyntaxLineLimit := 1000;
   fNoOfRecentFiles := 8;
   fCodeFoldingEnabled := True;
   fInternalInterpreterHidden := True;
@@ -539,11 +538,12 @@ begin
   fSSHCommand := 'ssh';
   fSSHOptions := '-o PasswordAuthentication=no -o StrictHostKeyChecking=no';
   fScpCommand := 'scp';
-  fScpOptions := '-o PasswordAuthentication=no -o StrictHostKeyChecking=no';
+  fScpOptions := '-T -o PasswordAuthentication=no -o StrictHostKeyChecking=no';
   fSSHDisableVariablesWin := True;
   fAlwaysUseSockets := True;
   fTrimTrailingSpacesOnSave := True;
   fTraceOnlyIntoOpenFiles := False;
+  fLspDebug := False;
   fCodeFolding := TSynCodeFolding.Create;
   fCodeFolding.GutterShapeSize := 9;  // default value
 end;
@@ -622,6 +622,8 @@ begin
   // Font Size is a published property and is read
   AStorage.ReadPersistent(APath, AProperty as TFont, Recursive, ClearFirst,
     TJvAppStorageFontPropertyEngine.FFontIgnoreProperties);
+  if Screen.Fonts.IndexOf(TFont(AProperty).Name) < 0 then
+    TFont(AProperty).Name := DefaultCodeFontName;
 end;
 
 procedure TJvAppStorageFontPropertyEngine.WriteProperty(
@@ -646,12 +648,17 @@ type
 // Modify JvAppStorage handling of TSynGutter
 // We want to PPI scale size properties
 TJvAppStorageGutterPropertyEngine = class(TJvAppStoragePropertyBaseEngine)
+  private
+    class var FGutterIgnoreProperties: TStringList;
 public
   function Supports(AObject: TObject; AProperty: TObject): Boolean; override;
   procedure ReadProperty(AStorage: TJvCustomAppStorage; const APath: string; AObject: TObject; AProperty: TObject; const Recursive,
     ClearFirst: Boolean; const IgnoreProperties: TStrings = nil); override;
   procedure WriteProperty(AStorage: TJvCustomAppStorage; const APath: string; AObject: TObject; AProperty: TObject; const
     Recursive: Boolean; const IgnoreProperties: TStrings = nil); override;
+strict private
+  class constructor Create;
+  class destructor Destroy;
 end;
 
 { TJvAppStorageGutterPropertyEngine }
@@ -662,6 +669,17 @@ begin
   Result := AProperty is TSynGutter;
 end;
 
+class constructor TJvAppStorageGutterPropertyEngine.Create;
+begin
+  FGutterIgnoreProperties := TStringList.Create;
+  FGutterIgnoreProperties.Add('Bands');
+end;
+
+class destructor TJvAppStorageGutterPropertyEngine.Destroy;
+begin
+  FGutterIgnoreProperties.Free;
+end;
+
 procedure TJvAppStorageGutterPropertyEngine.ReadProperty(
   AStorage: TJvCustomAppStorage; const APath: string; AObject,
   AProperty: TObject; const Recursive, ClearFirst: Boolean;
@@ -670,7 +688,7 @@ Var
   FontSize : Integer;
 begin
   AStorage.ReadPersistent(APath, AProperty as TSynGutter, Recursive, ClearFirst,
-    IgnoreProperties);
+    FGutterIgnoreProperties);
   FontSize := TSynGutter(AProperty).Font.Size;
   TSynGutter(AProperty).ChangeScale(Screen.PixelsPerInch, 96);
   TSynGutter(AProperty).Font.Size := FontSize;
@@ -688,7 +706,7 @@ begin
   TSynGutter(AProperty).Font.Size := FontSize;
   AStorage.StorageOptions.StoreDefaultValues := True;
   AStorage.WritePersistent(APath, AProperty as TSynGutter, Recursive,
-    IgnoreProperties);
+    FGutterIgnoreProperties);
   AStorage.StorageOptions.StoreDefaultValues := False;
   TSynGutter(AProperty).ChangeScale(Screen.PixelsPerInch, 96);
   TSynGutter(AProperty).Font.Size := FontSize;
@@ -868,6 +886,7 @@ begin
     UserDataPath :=   ExtractFilePath(Application.ExeName);
     ColorThemesFilesDir := TPath.Combine(UserDataPath, 'Highlighters');
     StylesFilesDir := TPath.Combine(UserDataPath, 'Styles');
+    LspServerPath :=  TPath.Combine(UserDataPath, 'Lib\Lsp');
   end else begin
     UserDataPath := TPath.Combine(GetHomePath,  'PyScripter\');
     OptionsFileName := TPath.Combine(UserDataPath, 'PyScripter.ini');
@@ -877,6 +896,7 @@ begin
     PublicPath := TPath.Combine(TPath.GetPublicPath, 'PyScripter\');
     ColorThemesFilesDir := TPath.Combine(PublicPath, 'Highlighters');
     StylesFilesDir := TPath.Combine(PublicPath, 'Styles');
+    LspServerPath :=  TPath.Combine(PublicPath, 'Lsp');
     // First use setup
     CopyFileIfNeeded(TPath.Combine(PublicPath, 'PyScripter.ini'), OptionsFileName);
   end;
@@ -903,10 +923,8 @@ begin
     Gutter.Font.Name := Font.Name;
     Gutter.Font.Color := clGrayText;
     Gutter.Gradient := False;
-    Gutter.LeftOffset := 25;
-    Gutter.RightOffset := 1;
-    Gutter.Width := 27;
     Gutter.DigitCount := 2;
+    Gutter.ShowLineNumbers := True;
     Gutter.Autosize := True;
     Gutter.ChangeScale(Screen.PixelsPerInch, 96);
     Font.Size := 10;
@@ -918,7 +936,7 @@ begin
                 eoTrimTrailingSpaces, eoAutoIndent];
     WantTabs := True;
     TabWidth := 4;
-    MaxUndo := 32768;
+    MaxUndo := 0;
     // Scale BookmarkOptions
     BookMarkOptions.ChangeScale(Screen.PixelsPerInch, 96);
 

@@ -8,7 +8,7 @@ object PyIDEMainForm: TPyIDEMainForm
   Color = clWindow
   Ctl3D = False
   ParentFont = True
-  OldCreateOrder = False
+  OldCreateOrder = True
   Position = poDefault
   ShowHint = True
   StyleElements = [seFont, seClient]
@@ -25,13 +25,14 @@ object PyIDEMainForm: TPyIDEMainForm
     Top = 512
     Width = 868
     Height = 25
+    SizeGrip = False
     object lbStatusMessage: TSpTBXLabelItem
       Wrapping = twEndEllipsis
       Options = [tboNoAutoHint]
     end
     object SpTBXRightAlignSpacerItem1: TSpTBXRightAlignSpacerItem
       Wrapping = twNone
-      CustomWidth = 252
+      CustomWidth = 0
     end
     object SpTBXSeparatorItem22: TSpTBXSeparatorItem
     end
@@ -89,6 +90,12 @@ object PyIDEMainForm: TPyIDEMainForm
       Hint = 'Ready'
       ImageIndex = 0
       ImageName = 'StatusLED'
+      Images = vilIndicators
+    end
+    object spiLspLed: TSpTBXItem
+      Hint = 'Ready'
+      ImageIndex = 2
+      ImageName = 'LspLED'
       Images = vilIndicators
     end
     object spiExternalToolsLED: TSpTBXItem
@@ -579,7 +586,7 @@ object PyIDEMainForm: TPyIDEMainForm
         object TBXSeparatorItem18: TSpTBXSeparatorItem
         end
         object TBXSubmenuItem4: TSpTBXSubmenuItem
-          Caption = '&IDE Windows'
+          Caption = 'IDE &Windows'
           object mnViewII: TSpTBXItem
             Action = actViewII
           end
@@ -627,7 +634,7 @@ object PyIDEMainForm: TPyIDEMainForm
           end
         end
         object TBXSubmenuItem6: TSpTBXSubmenuItem
-          Caption = '&Navigate'
+          Caption = 'Navi&gate'
           object mnNavEditor: TSpTBXItem
             Action = actNavEditor
           end
@@ -932,6 +939,9 @@ object PyIDEMainForm: TPyIDEMainForm
         end
         object SpTBXItem2: TSpTBXItem
           Action = CommandsDataModule.actToolsEditStartupScripts
+        end
+        object SpTBXItem15: TSpTBXItem
+          Action = CommandsDataModule.actToolsRestartLS
         end
         object SpTBXSeparatorItem12: TSpTBXSeparatorItem
         end
@@ -1541,7 +1551,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actImportModule: TAction
       Category = 'Run'
-      Caption = '&Import Module'
+      Caption = 'Import &Module'
       HelpContext = 340
       HelpType = htContext
       Hint = 'Import module'
@@ -1596,7 +1606,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actViewStatusBar: TAction
       Category = 'View'
-      Caption = '&Status Bar'
+      Caption = 'Status &Bar'
       HelpContext = 360
       HelpType = htContext
       Hint = 'View/Hide status bar'
@@ -1615,7 +1625,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actExternalRunConfigure: TAction
       Category = 'Run'
-      Caption = '&Configure External Run...'
+      Caption = 'Configure &External Run...'
       HelpContext = 340
       HelpType = htContext
       Hint = 'Configure External Run'
@@ -1753,7 +1763,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actClearAllBreakpoints: TAction
       Category = 'Run'
-      Caption = '&Clear All Breakpoints'
+      Caption = 'Clear A&ll Breakpoints'
       HelpContext = 340
       HelpType = htContext
       Hint = 'Clear all breakpoints'
@@ -1839,7 +1849,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actViewFindResults: TAction
       Category = 'View'
-      Caption = '&Find in Files Results'
+      Caption = 'Find &in Files Results'
       HelpContext = 360
       HelpType = htContext
       Hint = 'View/Hide Find in Files Results'
@@ -1878,7 +1888,7 @@ object PyIDEMainForm: TPyIDEMainForm
     end
     object actFindReferences: TAction
       Category = 'Refactoring'
-      Caption = 'Find &References'
+      Caption = 'Find R&eferences'
       HelpContext = 840
       HelpType = htContext
       Hint = 'Find references of an Identifier'
@@ -2335,43 +2345,43 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'FileOpen'
       end
       item
-        CollectionIndex = 98
+        CollectionIndex = 99
         CollectionName = 'Save'
         Disabled = False
         Name = 'Save'
       end
       item
-        CollectionIndex = 99
+        CollectionIndex = 100
         CollectionName = 'SaveAll'
         Disabled = False
         Name = 'SaveAll'
       end
       item
-        CollectionIndex = 71
+        CollectionIndex = 72
         CollectionName = 'PrintSetup'
         Disabled = False
         Name = 'PrintSetup'
       end
       item
-        CollectionIndex = 70
+        CollectionIndex = 71
         CollectionName = 'PrintPreview'
         Disabled = False
         Name = 'PrintPreview'
       end
       item
-        CollectionIndex = 69
+        CollectionIndex = 70
         CollectionName = 'Print'
         Disabled = False
         Name = 'Print'
       end
       item
-        CollectionIndex = 125
+        CollectionIndex = 127
         CollectionName = 'Undo'
         Disabled = False
         Name = 'Undo'
       end
       item
-        CollectionIndex = 86
+        CollectionIndex = 87
         CollectionName = 'Redo'
         Disabled = False
         Name = 'Redo'
@@ -2389,7 +2399,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Copy'
       end
       item
-        CollectionIndex = 64
+        CollectionIndex = 65
         CollectionName = 'Paste'
         Disabled = False
         Name = 'Paste'
@@ -2401,7 +2411,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Delete'
       end
       item
-        CollectionIndex = 100
+        CollectionIndex = 101
         CollectionName = 'Search'
         Disabled = False
         Name = 'Search'
@@ -2413,7 +2423,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'FindNext'
       end
       item
-        CollectionIndex = 90
+        CollectionIndex = 91
         CollectionName = 'Replace'
         Disabled = False
         Name = 'Replace'
@@ -2491,13 +2501,13 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Help'
       end
       item
-        CollectionIndex = 96
+        CollectionIndex = 97
         CollectionName = 'RunScript'
         Disabled = False
         Name = 'RunScript'
       end
       item
-        CollectionIndex = 87
+        CollectionIndex = 88
         CollectionName = 'Refresh'
         Disabled = False
         Name = 'Refresh'
@@ -2521,7 +2531,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Exit'
       end
       item
-        CollectionIndex = 92
+        CollectionIndex = 93
         CollectionName = 'Run'
         Disabled = False
         Name = 'Run'
@@ -2533,25 +2543,25 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Debug'
       end
       item
-        CollectionIndex = 97
+        CollectionIndex = 98
         CollectionName = 'RunToCursor'
         Disabled = False
         Name = 'RunToCursor'
       end
       item
-        CollectionIndex = 106
+        CollectionIndex = 107
         CollectionName = 'StepIn'
         Disabled = False
         Name = 'StepIn'
       end
       item
-        CollectionIndex = 108
+        CollectionIndex = 109
         CollectionName = 'StepOver'
         Disabled = False
         Name = 'StepOver'
       end
       item
-        CollectionIndex = 107
+        CollectionIndex = 108
         CollectionName = 'StepOut'
         Disabled = False
         Name = 'StepOut'
@@ -2575,13 +2585,13 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'CallStack'
       end
       item
-        CollectionIndex = 129
+        CollectionIndex = 131
         CollectionName = 'VariablesWin'
         Disabled = False
         Name = 'VariablesWin'
       end
       item
-        CollectionIndex = 133
+        CollectionIndex = 135
         CollectionName = 'WatchesWin'
         Disabled = False
         Name = 'WatchesWin'
@@ -2611,13 +2621,13 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'CodeComment'
       end
       item
-        CollectionIndex = 124
+        CollectionIndex = 126
         CollectionName = 'UnCodeComment'
         Disabled = False
         Name = 'UnCodeComment'
       end
       item
-        CollectionIndex = 60
+        CollectionIndex = 61
         CollectionName = 'MessagesWin'
         Disabled = False
         Name = 'MessagesWin'
@@ -2629,37 +2639,37 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'CodeExplorer'
       end
       item
-        CollectionIndex = 79
+        CollectionIndex = 80
         CollectionName = 'PyDoc'
         Disabled = False
         Name = 'PyDoc'
       end
       item
-        CollectionIndex = 63
+        CollectionIndex = 64
         CollectionName = 'PageSetup'
         Disabled = False
         Name = 'PageSetup'
       end
       item
-        CollectionIndex = 112
+        CollectionIndex = 113
         CollectionName = 'TabNext'
         Disabled = False
         Name = 'TabNext'
       end
       item
-        CollectionIndex = 113
+        CollectionIndex = 114
         CollectionName = 'TabPrevious'
         Disabled = False
         Name = 'TabPrevious'
       end
       item
-        CollectionIndex = 120
+        CollectionIndex = 122
         CollectionName = 'Tools'
         Disabled = False
         Name = 'Tools'
       end
       item
-        CollectionIndex = 121
+        CollectionIndex = 123
         CollectionName = 'ToolsSetup'
         Disabled = False
         Name = 'ToolsSetup'
@@ -2671,13 +2681,13 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'FileExplorer'
       end
       item
-        CollectionIndex = 119
+        CollectionIndex = 120
         CollectionName = 'TodoWin'
         Disabled = False
         Name = 'TodoWin'
       end
       item
-        CollectionIndex = 101
+        CollectionIndex = 102
         CollectionName = 'SearchFolder'
         Disabled = False
         Name = 'SearchFolder'
@@ -2701,7 +2711,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'CmdOuputWin'
       end
       item
-        CollectionIndex = 103
+        CollectionIndex = 104
         CollectionName = 'SpecialChars'
         Disabled = False
         Name = 'SpecialChars'
@@ -2719,7 +2729,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'ArrowRight'
       end
       item
-        CollectionIndex = 88
+        CollectionIndex = 89
         CollectionName = 'RegExp'
         Disabled = False
         Name = 'RegExp'
@@ -2731,13 +2741,13 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Keyboard'
       end
       item
-        CollectionIndex = 126
+        CollectionIndex = 128
         CollectionName = 'UnitTestWin'
         Disabled = False
         Name = 'UnitTestWin'
       end
       item
-        CollectionIndex = 110
+        CollectionIndex = 111
         CollectionName = 'Styles'
         Disabled = False
         Name = 'Styles'
@@ -2749,19 +2759,19 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Assembly'
       end
       item
-        CollectionIndex = 136
+        CollectionIndex = 138
         CollectionName = 'ZoomIn'
         Disabled = False
         Name = 'ZoomIn'
       end
       item
-        CollectionIndex = 137
+        CollectionIndex = 139
         CollectionName = 'ZoomOut'
         Disabled = False
         Name = 'ZoomOut'
       end
       item
-        CollectionIndex = 65
+        CollectionIndex = 66
         CollectionName = 'Pause'
         Disabled = False
         Name = 'Pause'
@@ -2797,43 +2807,43 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'GoToError'
       end
       item
-        CollectionIndex = 135
+        CollectionIndex = 137
         CollectionName = 'WordWrap'
         Disabled = False
         Name = 'WordWrap'
       end
       item
-        CollectionIndex = 105
+        CollectionIndex = 106
         CollectionName = 'SplitVertical'
         Disabled = False
         Name = 'SplitVertical'
       end
       item
-        CollectionIndex = 104
+        CollectionIndex = 105
         CollectionName = 'SplitHorizontal'
         Disabled = False
         Name = 'SplitHorizontal'
       end
       item
-        CollectionIndex = 68
+        CollectionIndex = 69
         CollectionName = 'PostMortem'
         Disabled = False
         Name = 'PostMortem'
       end
       item
-        CollectionIndex = 83
+        CollectionIndex = 84
         CollectionName = 'Python'
         Disabled = False
         Name = 'Python'
       end
       item
-        CollectionIndex = 84
+        CollectionIndex = 85
         CollectionName = 'PythonScript'
         Disabled = False
         Name = 'PythonScript'
       end
       item
-        CollectionIndex = 73
+        CollectionIndex = 74
         CollectionName = 'ProjectExplorer'
         Disabled = False
         Name = 'ProjectExplorer'
@@ -2845,7 +2855,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Editor'
       end
       item
-        CollectionIndex = 95
+        CollectionIndex = 96
         CollectionName = 'RunLast'
         Disabled = False
         Name = 'RunLast'
@@ -2869,25 +2879,25 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Link'
       end
       item
-        CollectionIndex = 134
+        CollectionIndex = 136
         CollectionName = 'Web'
         Disabled = False
         Name = 'Web'
       end
       item
-        CollectionIndex = 111
+        CollectionIndex = 112
         CollectionName = 'TabClose'
         Disabled = False
         Name = 'TabCLose'
       end
       item
-        CollectionIndex = 115
+        CollectionIndex = 116
         CollectionName = 'TabsClose'
         Disabled = False
         Name = 'TabsClose'
       end
       item
-        CollectionIndex = 80
+        CollectionIndex = 81
         CollectionName = 'PySetup'
         Disabled = False
         Name = 'PySetup'
@@ -2899,7 +2909,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Download'
       end
       item
-        CollectionIndex = 128
+        CollectionIndex = 130
         CollectionName = 'Upload'
         Disabled = False
         Name = 'Upload'
@@ -2911,7 +2921,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Layouts'
       end
       item
-        CollectionIndex = 114
+        CollectionIndex = 115
         CollectionName = 'Tabs'
         Disabled = False
         Name = 'Tabs'
@@ -2929,7 +2939,7 @@ object PyIDEMainForm: TPyIDEMainForm
         Name = 'Edit'
       end
       item
-        CollectionIndex = 102
+        CollectionIndex = 103
         CollectionName = 'Setup'
         Disabled = False
         Name = 'Setup'
@@ -2946,27 +2956,35 @@ object PyIDEMainForm: TPyIDEMainForm
       item
         IconName = 'StatusLED'
         SVGText = 
-          '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"'#13#10' ' +
-          '    xmlns:xlink="http://www.w3.org/1999/xlink" >'#13#10'  <defs>'#13#10'    ' +
-          '<radialGradient cx=".5" cy=".5"  fx=".3" fy=".2" r="0.5" id="myG' +
-          'radient" gradientUnits="objectBoundingBox">'#13#10'      <stop offset=' +
-          '"0%" stop-opacity="0.3" stop-color="#22AA22"/>'#13#10'      <stop offs' +
-          'et="1" stop-opacity="1" stop-color="#22AA22"/>'#13#10'    </radialGrad' +
-          'ient>'#13#10'  </defs>'#13#10#13#10'  <!-- using my radial gradient 4CBB17 -->'#13#10 +
-          '  <circle cx="50" cy="50" r="40" fill="url(#myGradient)" />'#13#10'</s' +
-          'vg>'
+          '<svg viewBox="0 0 100 100">'#13#10'  <defs>'#13#10'    <radialGradient cx=".' +
+          '5" cy=".5"  fx=".3" fy=".2" r="0.5" id="myGradient" gradientUnit' +
+          's="objectBoundingBox">'#13#10'      <stop offset="0%" stop-opacity="0.' +
+          '3" stop-color="#22AA22"/>'#13#10'      <stop offset="1" stop-opacity="' +
+          '1" stop-color="#22AA22"/>'#13#10'    </radialGradient>'#13#10'  </defs>'#13#10#13#10' ' +
+          ' <!-- using my radial gradient 4CBB17 -->'#13#10'  <circle cx="50" cy=' +
+          '"50" r="40" fill="url(#myGradient)" />'#13#10'</svg>'
       end
       item
         IconName = 'ExternalToolsLED'
         SVGText = 
-          '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"'#13#10' ' +
-          '    xmlns:xlink="http://www.w3.org/1999/xlink" >'#13#10'  <defs>'#13#10'    ' +
-          '<radialGradient cx=".5" cy=".5"  fx=".3" fy=".2" r="0.5" id="myG' +
-          'radient" gradientUnits="objectBoundingBox">'#13#10'      <stop offset=' +
-          '"0%" stop-opacity="0.3" stop-color="#E24444"/>'#13#10'      <stop offs' +
-          'et="1" stop-opacity="1" stop-color="#E24444"/>'#13#10'    </radialGrad' +
-          'ient>'#13#10'  </defs>'#13#10#13#10'  <!-- using my radial gradient -->'#13#10'  <circ' +
-          'le cx="50" cy="50" r="40" fill="url(#myGradient)" />'#13#10'</svg>'
+          '<svg viewBox="0 0 100 100">'#13#10'  <defs>'#13#10'    <radialGradient cx=".' +
+          '5" cy=".5"  fx=".3" fy=".2" r="0.5" id="myGradient" gradientUnit' +
+          's="objectBoundingBox">'#13#10'      <stop offset="0%" stop-opacity="0.' +
+          '3" stop-color="#E24444"/>'#13#10'      <stop offset="1" stop-opacity="' +
+          '1" stop-color="#E24444"/>'#13#10'    </radialGradient>'#13#10'  </defs>'#13#10#13#10' ' +
+          ' <!-- using my radial gradient -->'#13#10'  <circle cx="50" cy="50" r=' +
+          '"40" fill="url(#myGradient)" />'#13#10'</svg>'
+      end
+      item
+        IconName = 'LspLED'
+        SVGText = 
+          '<svg viewBox="0 0 100 100">'#13#10'  <defs>'#13#10'    <radialGradient cx=".' +
+          '5" cy=".5"  fx=".3" fy=".2" r="0.5" id="myGradient" gradientUnit' +
+          's="objectBoundingBox">'#13#10'      <stop offset="0%" stop-opacity="0.' +
+          '3" stop-color="#FF5F1F"/>'#13#10'      <stop offset="1" stop-opacity="' +
+          '1" stop-color="#FF5F1F"/>'#13#10'    </radialGradient>'#13#10'  </defs>'#13#10#13#10' ' +
+          ' <!-- using my radial gradient 4CBB17 -->'#13#10'  <circle cx="50" cy=' +
+          '"50" r="40" fill="url(#myGradient)" />'#13#10'</svg>'
       end>
     Left = 40
     Top = 400
@@ -2986,11 +3004,41 @@ object PyIDEMainForm: TPyIDEMainForm
         CollectionName = 'ExternalToolsLED'
         Disabled = False
         Name = 'ExternalToolsLED'
+      end
+      item
+        CollectionIndex = 2
+        CollectionName = 'LspLED'
+        Disabled = False
+        Name = 'LspLED'
       end>
     ImageCollection = icIndicators
+    PreserveItems = True
     Width = 12
     Height = 12
     Left = 112
+    Top = 400
+  end
+  object vilTabDecorators: TVirtualImageList
+    DisabledGrayscale = False
+    DisabledSuffix = '_Disabled'
+    Images = <
+      item
+        CollectionIndex = 9
+        CollectionName = 'Bug'
+        Disabled = False
+        Name = 'Bug'
+      end
+      item
+        CollectionIndex = 60
+        CollectionName = 'Lock'
+        Disabled = False
+        Name = 'Lock'
+      end>
+    ImageCollection = CommandsDataModule.icSVGImages
+    PreserveItems = True
+    Width = 14
+    Height = 14
+    Left = 184
     Top = 400
   end
 end

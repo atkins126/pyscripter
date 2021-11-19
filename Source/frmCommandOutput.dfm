@@ -73,31 +73,14 @@ inherited OutputWindow: TOutputWindow
       end
     end
   end
-  object TimeoutTimer: TTimer
-    Enabled = False
-    OnTimer = TimeoutTimerTimer
-    Left = 27
-    Top = 184
-  end
   object OutputPopup: TSpTBXPopupMenu
     Images = vilImages
     Left = 28
     Top = 76
     object RunningProcess: TSpTBXSubmenuItem
       Caption = 'Running Process'
-      object mnClose: TSpTBXItem
-        Action = actToolClose
-      end
-      object mnQuit: TSpTBXItem
-        Action = actToolQuit
-      end
       object mnTerminate: TSpTBXItem
         Action = actToolTerminate
-      end
-      object N3: TSpTBXSeparatorItem
-      end
-      object mnStopWaiting: TSpTBXItem
-        Action = actToolStopWaiting
       end
     end
     object N1: TSpTBXSeparatorItem
@@ -147,25 +130,6 @@ inherited OutputWindow: TOutputWindow
       ImageName = 'Stop'
       OnExecute = actToolTerminateExecute
     end
-    object actToolClose: TAction
-      Caption = '&Close'
-      Hint = 'Close running tool'
-      ImageIndex = 3
-      ImageName = 'Exit'
-      OnExecute = actToolCloseExecute
-    end
-    object actToolQuit: TAction
-      Caption = '&Quit'
-      Hint = 'Post quit message to running tool'
-      ImageIndex = 4
-      ImageName = 'Quit'
-      OnExecute = actToolQuitExecute
-    end
-    object actToolStopWaiting: TAction
-      Caption = 'Stop &Waiting'
-      Hint = 'Stop waiting for running tool'
-      OnExecute = actToolStopWaitingExecute
-    end
   end
   object vilImages: TVirtualImageList
     DisabledGrayscale = False
@@ -184,7 +148,7 @@ inherited OutputWindow: TOutputWindow
         Name = 'Delete'
       end
       item
-        CollectionIndex = 109
+        CollectionIndex = 110
         CollectionName = 'Stop'
         Disabled = False
         Name = 'Stop'
@@ -196,7 +160,7 @@ inherited OutputWindow: TOutputWindow
         Name = 'Exit'
       end
       item
-        CollectionIndex = 85
+        CollectionIndex = 86
         CollectionName = 'Quit'
         Disabled = False
         Name = 'Quit'

@@ -18,7 +18,10 @@ msgstr ""
 msgid "Arabic"
 msgstr ""
 
-msgid "Chinese"
+msgid "Simplified Chinese"
+msgstr ""
+
+msgid "Traditional Chinese"
 msgstr ""
 
 msgid "English"

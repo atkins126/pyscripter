@@ -6,9 +6,10 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
   ClientHeight = 451
   ClientWidth = 554
   ShowHint = True
+  OnClose = FormClose
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Panel: TPanel
     Left = 0
     Top = 0
@@ -33,56 +34,56 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
       object Label1: TLabel
         Left = 10
         Top = 24
-        Width = 31
-        Height = 13
+        Width = 35
+        Height = 15
         Caption = '&Name:'
         FocusControl = edName
       end
       object Label2: TLabel
         Left = 10
         Top = 70
-        Width = 48
-        Height = 13
+        Width = 51
+        Height = 15
         Caption = '&Template:'
         FocusControl = SynTemplate
       end
       object Label5: TLabel
         Left = 290
         Top = 20
-        Width = 49
-        Height = 13
+        Width = 51
+        Height = 15
         Caption = '&Category:'
         FocusControl = edCategory
       end
       object Label4: TLabel
         Left = 10
         Top = 242
-        Width = 204
-        Height = 13
+        Width = 230
+        Height = 15
         Caption = 'Press Shift+Ctrl+M for Modifier completion'
         Enabled = False
       end
       object Label3: TLabel
         Left = 10
         Top = 226
-        Width = 214
-        Height = 13
+        Width = 235
+        Height = 15
         Caption = 'Press Shift+Ctrl+P for Parameter completion'
         Enabled = False
       end
       object Label6: TLabel
         Left = 10
         Top = 44
-        Width = 89
-        Height = 13
+        Width = 95
+        Height = 15
         Caption = '&Default Extension:'
         FocusControl = edExtension
       end
       object Label7: TLabel
         Left = 288
         Top = 44
-        Width = 55
-        Height = 13
+        Width = 63
+        Height = 15
         Caption = '&Highlighter:'
         FocusControl = edCategory
       end
@@ -105,14 +106,32 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
         Gutter.Font.Height = -11
         Gutter.Font.Name = 'Courier New'
         Gutter.Font.Style = []
-        Gutter.Width = 0
+        Gutter.Visible = False
+        Gutter.Bands = <
+          item
+            Kind = gbkMarks
+            Width = 15
+          end
+          item
+            Kind = gbkLineNumbers
+            Visible = False
+          end
+          item
+            Kind = gbkFold
+            Visible = False
+          end
+          item
+            Kind = gbkMargin
+            Width = 2
+          end>
+        Options = [eoAutoIndent, eoDragDropEditing, eoEnhanceEndKey, eoGroupUndo, eoShowScrollHint, eoSmartTabDelete, eoSmartTabs, eoTabsToSpaces]
         TabWidth = 4
       end
       object CBHighlighters: TComboBox
         Left = 400
         Top = 44
         Width = 134
-        Height = 21
+        Height = 23
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 4
@@ -122,14 +141,14 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
         Left = 127
         Top = 17
         Width = 127
-        Height = 21
+        Height = 23
         TabOrder = 0
       end
       object edCategory: TEdit
         Left = 400
         Top = 20
         Width = 134
-        Height = 21
+        Height = 23
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 2
       end
@@ -137,7 +156,7 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
         Left = 216
         Top = 44
         Width = 38
-        Height = 21
+        Height = 23
         TabOrder = 3
       end
     end
@@ -284,40 +303,33 @@ inherited FileTemplatesDialog: TFileTemplatesDialog
     end
   end
   object vilImages: TVirtualImageList
-    DisabledGrayscale = False
-    DisabledSuffix = '_Disabled'
     Images = <
       item
-        CollectionIndex = 14
+        CollectionIndex = 21
         CollectionName = 'Delete'
-        Disabled = False
         Name = 'Delete'
       end
       item
-        CollectionIndex = 39
+        CollectionIndex = 88
         CollectionName = 'Refresh'
-        Disabled = False
         Name = 'Refresh'
       end
       item
-        CollectionIndex = 47
+        CollectionIndex = 129
         CollectionName = 'Up'
-        Disabled = False
         Name = 'Up'
       end
       item
-        CollectionIndex = 48
+        CollectionIndex = 22
         CollectionName = 'Down'
-        Disabled = False
         Name = 'Down'
       end
       item
-        CollectionIndex = 49
+        CollectionIndex = 68
         CollectionName = 'Plus'
-        Disabled = False
         Name = 'Plus'
       end>
-    ImageCollection = CommandsDataModule.icSvgImages
+    ImageCollection = CommandsDataModule.icSVGImages
     PreserveItems = True
     Left = 320
     Top = 27

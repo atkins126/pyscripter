@@ -28,6 +28,7 @@ uses
   Vcl.ImgList,
   Vcl.BaseImageCollection,
   SVGIconImageCollection,
+  SVGIconImage,
   SynEdit,
   SynEditPrint,
   SynUnicode,
@@ -256,6 +257,7 @@ type
     SynWebCompletion: TSynCompletionProposal;
     SynParamCompletion: TSynCompletionProposal;
     SynCodeCompletion: TSynCompletionProposal;
+    actToolsRestartLS: TAction;
     function ProgramVersionHTTPLocationLoadFileFromRemote(
       AProgramVersionLocation: TJvProgramVersionHTTPLocation; const ARemotePath,
       ARemoteFileName, ALocalPath, ALocalFileName: string): string;
@@ -360,6 +362,7 @@ type
     procedure actEditReadOnlyExecute(Sender: TObject);
     procedure actFileSaveToRemoteExecute(Sender: TObject);
     procedure actDonateExecute(Sender: TObject);
+    procedure actToolsRestartLSExecute(Sender: TObject);
     procedure ParameterCompletionExecute(Kind: SynCompletionType;
       Sender: TObject; var CurrentInput: string; var x, y: Integer;
       var CanExecute: Boolean);
@@ -487,6 +490,7 @@ uses
   frmEditor,
   frmFindResults,
   frmFunctionList,
+  JediLspClient,
   uHighlighterProcs,
   uParams,
   uCommonFunctions,
@@ -1084,7 +1088,7 @@ procedure TCommandsDataModule.actSearchGoToDebugLineExecute(Sender: TObject);
 begin
   with PyControl.CurrentPos do
     if (Line >= 1) and (PyControl.ActiveDebugger <> nil) and not GI_PyControl.Running then
-      GI_PyIDEServices.ShowFilePosition(Editor.GetFileNameOrTitle , Line, 1, 0, True, True);
+      GI_PyIDEServices.ShowFilePosition(Editor.FileId , Line, 1, 0, True, True);
 end;
 
 procedure TCommandsDataModule.actSearchGoToLineExecute(Sender: TObject);
@@ -1212,8 +1216,7 @@ Var
   Editor : IEditor;
 begin
   if Assigned(GI_ActiveEditor) and GI_ActiveEditor.HasPythonFile then begin
-    Tests := TUnitTestWizard.GenerateTests(GI_ActiveEditor.GetFileNameOrTitle,
-      GI_ActiveEditor.SynEdit.Text);
+    Tests := TUnitTestWizard.GenerateTests(GI_ActiveEditor.FileId);
     if Tests <> '' then begin
       Editor := PyIDEMainForm.DoOpenFile('', 'Python');
       if Assigned(Editor) then
@@ -1829,7 +1832,7 @@ begin
           StyledMessageDlg(Format(_(SFileRenamedOrDeleted), [Ed.FileName]) , mtWarning, [mbOK], 0);
         end;
       end else if not SameDateTime(TEditorForm(Ed.Form).FileTime, FTime) then begin
-        ChangedFiles.AddObject(Ed.GetFileNameOrTitle, Ed.Form);
+        ChangedFiles.AddObject(Ed.FileId, Ed.Form);
         // Prevent further notifications on this file
         TEditorForm(Ed.Form).FileTime := FTime;
       end;
@@ -1939,7 +1942,7 @@ Var
   IsRegistered : Boolean;
   Key : string;
 begin
-  SetLength(Categories, 10);
+  SetLength(Categories, 11);
   with Categories[0] do begin
     DisplayName := _('IDE');
     SetLength(Options, 12);
@@ -2044,7 +2047,7 @@ begin
   end;
   with Categories[5] do begin
     DisplayName := _('Editor');
-    SetLength(Options, 21);
+    SetLength(Options, 19);
     Options[0].PropertyName := 'SearchTextAtCaret';
     Options[0].DisplayName := _('Search text at caret');
     Options[1].PropertyName := 'CreateBackupFiles';
@@ -2059,58 +2062,52 @@ begin
     Options[5].DisplayName := _('Auto-complete brackets');
     Options[6].PropertyName := 'MarkExecutableLines';
     Options[6].DisplayName := _('Show executable line marks');
-    Options[7].PropertyName := 'CheckSyntaxAsYouType';
-    Options[7].DisplayName := _('Check syntax as you type');
-    Options[8].PropertyName := 'NewFileLineBreaks';
-    Options[8].DisplayName := _('Default line break format for new files');
-    Options[9].PropertyName := 'NewFileEncoding';
-    Options[9].DisplayName := _('Default file encoding for new files');
-    Options[10].PropertyName := 'DetectUTF8Encoding';
-    Options[10].DisplayName := _('Detect UTF-8 encoding when opening files');
-    Options[11].PropertyName := 'AutoReloadChangedFiles';
-    Options[11].DisplayName := _('Auto-reload changed files');
-    Options[12].PropertyName := 'AutoHideFindToolbar';
-    Options[12].DisplayName := _('Auto-hide find toolbar');
-    Options[13].PropertyName := 'HighlightSelectedWord';
-    Options[13].DisplayName := _('Highlight selected word');
-    Options[14].PropertyName := 'HighlightSelectedWordColor';
-    Options[14].DisplayName := _('Highlight color of selected word');
-    Options[15].PropertyName := 'DisplayPackageNames';
-    Options[15].DisplayName := _('Display package names in editor tabs');
-    Options[16].PropertyName := 'CheckSyntaxLineLimit';
-    Options[16].DisplayName := _('File line limit for syntax check as you type');
-    Options[17].PropertyName := 'CodeFoldingEnabled';
-    Options[17].DisplayName := _('Code folding enabled by default');
-    Options[18].PropertyName := 'CodeFolding';
-    Options[18].DisplayName := _('Code folding options');
-    Options[19].PropertyName := 'CompactLineNumbers';
-    Options[19].DisplayName := _('Compact Line Numbers');
-    Options[20].PropertyName := 'TrimTrailingSpacesOnSave';
-    Options[20].DisplayName := _('Trim trailing spaces when files are saved');
+    Options[7].PropertyName := 'NewFileLineBreaks';
+    Options[7].DisplayName := _('Default line break format for new files');
+    Options[8].PropertyName := 'NewFileEncoding';
+    Options[8].DisplayName := _('Default file encoding for new files');
+    Options[9].PropertyName := 'DetectUTF8Encoding';
+    Options[9].DisplayName := _('Detect UTF-8 encoding when opening files');
+    Options[10].PropertyName := 'AutoReloadChangedFiles';
+    Options[10].DisplayName := _('Auto-reload changed files');
+    Options[11].PropertyName := 'AutoHideFindToolbar';
+    Options[11].DisplayName := _('Auto-hide find toolbar');
+    Options[12].PropertyName := 'HighlightSelectedWord';
+    Options[12].DisplayName := _('Highlight selected word');
+    Options[13].PropertyName := 'HighlightSelectedWordColor';
+    Options[13].DisplayName := _('Highlight color of selected word');
+    Options[14].PropertyName := 'DisplayPackageNames';
+    Options[14].DisplayName := _('Display package names in editor tabs');
+    Options[15].PropertyName := 'CodeFoldingEnabled';
+    Options[15].DisplayName := _('Code folding enabled by default');
+    Options[16].PropertyName := 'CodeFolding';
+    Options[16].DisplayName := _('Code folding options');
+    Options[17].PropertyName := 'CompactLineNumbers';
+    Options[17].DisplayName := _('Compact Line Numbers');
+    Options[18].PropertyName := 'TrimTrailingSpacesOnSave';
+    Options[18].DisplayName := _('Trim trailing spaces when files are saved');
   end;
   with Categories[6] do begin
     DisplayName := _('Code Completion');
-    SetLength(Options, 10);
-    Options[0].PropertyName := 'SpecialPackages';
-    Options[0].DisplayName := _('Special packages');
-    Options[1].PropertyName := 'CodeCompletionListSize';
-    Options[1].DisplayName := _('Code completion list size');
-    Options[2].PropertyName := 'EditorCodeCompletion';
-    Options[2].DisplayName := _('Editor code completion');
-    Options[3].PropertyName := 'InterpreterCodeCompletion';
-    Options[3].DisplayName := _('Interpreter code completion');
-    Options[4].PropertyName := 'CodeCompletionCaseSensitive';
-    Options[4].DisplayName := _('Case sensitive');
-    Options[5].PropertyName := 'CompleteKeywords';
-    Options[5].DisplayName := _('Complete Python keywords');
-    Options[6].PropertyName := 'CompleteAsYouType';
-    Options[6].DisplayName := _('Complete as you type');
-    Options[7].PropertyName := 'AutoCompletionFont';
-    Options[7].DisplayName := _('Auto completion font');
-    Options[8].PropertyName := 'CompleteWithWordBreakChars';
-    Options[8].DisplayName := _('Complete with word-break characters');
-    Options[9].PropertyName := 'CompleteWithOneEntry';
-    Options[9].DisplayName := _('Auto-complete with one entry');
+    SetLength(Options, 9);
+    Options[0].PropertyName := 'CodeCompletionListSize';
+    Options[0].DisplayName := _('Code completion list size');
+    Options[1].PropertyName := 'EditorCodeCompletion';
+    Options[1].DisplayName := _('Editor code completion');
+    Options[2].PropertyName := 'InterpreterCodeCompletion';
+    Options[2].DisplayName := _('Interpreter code completion');
+    Options[3].PropertyName := 'CodeCompletionCaseSensitive';
+    Options[3].DisplayName := _('Case sensitive');
+    Options[4].PropertyName := 'CompleteKeywords';
+    Options[4].DisplayName := _('Complete Python keywords');
+    Options[5].PropertyName := 'CompleteAsYouType';
+    Options[5].DisplayName := _('Complete as you type');
+    Options[6].PropertyName := 'AutoCompletionFont';
+    Options[6].DisplayName := _('Auto completion font');
+    Options[7].PropertyName := 'CompleteWithWordBreakChars';
+    Options[7].DisplayName := _('Complete with word-break characters');
+    Options[8].PropertyName := 'CompleteWithOneEntry';
+    Options[8].DisplayName := _('Auto-complete with one entry');
   end;
   with Categories[7] do begin
     DisplayName := _('Shell Integration');
@@ -2139,6 +2136,16 @@ begin
     Options[3].DisplayName := _('SCP options');
     Options[4].PropertyName := 'SSHDisableVariablesWin';
     Options[4].DisplayName := _('Disable Variables Window with SSH');
+  end;
+  with Categories[10] do begin
+    DisplayName := _('Language Server');
+    SetLength(Options, 3);
+    Options[0].PropertyName := 'LspDebug';
+    Options[0].DisplayName := _('Language server debug output');
+    Options[1].PropertyName := 'CheckSyntaxAsYouType';
+    Options[1].DisplayName := _('Check syntax as you type');
+    Options[2].PropertyName := 'SpecialPackages';
+    Options[2].DisplayName := _('Special packages');
   end;
 
   // Shell Integration
@@ -2340,7 +2347,7 @@ begin
   actEditUTF16BE.Checked := Assigned(GI_ActiveEditor) and
     (GI_ActiveEditor.FileEncoding = sf_UTF16BE);
 
-  SelAvail := Assigned(GI_EditCmds) and GI_EditCmds.CanCopy;
+  SelAvail := Assigned(GI_ActiveEditor) and GI_ActiveEditor.ActiveSynEdit.SelAvail;
   // Source Code Actions
   actEditIndent.Enabled := SelAvail;
   actEditDedent.Enabled := SelAvail;
@@ -2644,7 +2651,7 @@ Var
 begin
   Editor := GI_PyIDEServices.ActiveEditor;
   if Assigned(Editor) then
-    Clipboard.AsText := Editor.GetFileNameOrTitle;
+    Clipboard.AsText := Editor.FileId;
 end;
 
 procedure TCommandsDataModule.actFindFunctionExecute(Sender: TObject);
@@ -2683,7 +2690,7 @@ var
   OldCaret : TBufferCoord;
 begin
   if Assigned(GI_ActiveEditor) then with GI_ActiveEditor.ActiveSynEdit do begin
-    SearchText :=  GetWordAtRowCol(CaretXY);
+    SearchText :=  WordAtCursor;
     if SearchText <> '' then begin
       OldCaret := CaretXY;
 
@@ -2796,6 +2803,11 @@ begin
     else
       StyledMessageDlg(_(SCurrentVersionUptodate), mtInformation, [mbOK], 0);
   PyIDEOptions.DateLastCheckedForUpdates := Now;
+end;
+
+procedure TCommandsDataModule.actToolsRestartLSExecute(Sender: TObject);
+begin
+  TJedi.CreateServer;
 end;
 
 procedure TCommandsDataModule.GetEditorUserCommand(AUserCommand: Integer;
@@ -3023,7 +3035,7 @@ begin
       then
         tbiSearchText.Text := SynEdit.SelText
       else begin
-        S := SynEdit.GetWordAtRowCol(SynEdit.CaretXY);
+        S := SynEdit.WordAtCursor;
         if S <> '' then
           tbiSearchText.Text := S;
       end;
@@ -3138,7 +3150,7 @@ begin
       for var i := ord('a') to ord('z') do TriggerChars := TriggerChars + Chr(i);
       for var i := ord('A') to ord('Z') do TriggerChars := TriggerChars + Chr(i);
       if PyIDEOptions.CompleteWithWordBreakChars or PyIDEOptions.CompleteWithOneEntry then
-        TimerInterval := 600
+        TimerInterval := 500
     end;
   end;
   // Syntax Parameter Completion
@@ -3167,6 +3179,7 @@ initialization
   // gettext stuff
   // Classes that should not be translated
   TP_GlobalIgnoreClass(TCustomImageCollection);
+  TP_GlobalIgnoreClass(TSVGIconImage);
   TP_GlobalIgnoreClass(TJvMultiStringHolder);
   TP_GlobalIgnoreClass(TSynEdit);
   TP_GlobalIgnoreClass(TSynCompletionProposal);
@@ -3179,12 +3192,12 @@ initialization
   TP_GlobalIgnoreClass(TJvCustomAppStorage);
   TP_GlobalIgnoreClass(TPythonModule);
   // VCL stuff
+  TP_GlobalIgnoreClass(TFont);
   TP_GlobalIgnoreClassProperty(TCustomAction,'Category');
   TP_GlobalIgnoreClassProperty(TCustomAction,'HelpKeyword');
   TP_GlobalIgnoreClassProperty(TObject,'ImageName');
   TP_GlobalIgnoreClassProperty(TControl,'HelpKeyword');
   TP_GlobalIgnoreClassProperty(TControl,'StyleName');
-  TP_GlobalIgnoreClass(TFont);
 
   //JCL Debug
   AddIgnoredException(EClipboardException);

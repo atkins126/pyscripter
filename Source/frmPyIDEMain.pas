@@ -527,9 +527,24 @@
 
   History:   v 4.1
           New Features
+            - Implementation of the Language Server Protocol
+            - Python language support provided by the Jedi language server
+            - Two new styles added Windows11_Light and Windows11_Dark
+            - Copy and paste code as html to Powerpoint and other applications
+            - Removed support for python 3.3-3.5
+            - Read only indicator on tabs
+            - Added traditional Chinese translation
           Issues addressed
-            #1116
+            #939, #951, #1116, #1118, #1119, #1122, #1123, #1125, #1129, #1133
+            #1136
+
+  History:   v 4.1.2
+          New Features
+          Issues addressed
+            #1140
 }
+// TODO: Process diagnostics
+
 { TODO : Review Search and Replace }
 { TODO : Auto PEP8 tool }
 { TODO: LiveTemplates features for Code Templates }
@@ -611,7 +626,6 @@ uses
   cPySupportTypes,
   cPyBaseDebugger,
   cPyDebugger,
-  cRefactoring,
   cPyScripterSettings,
   cPyControl;
 
@@ -1111,6 +1125,9 @@ type
     vilIndicators: TVirtualImageList;
     spiStatusLED: TSpTBXItem;
     spiExternalToolsLED: TSpTBXItem;
+    SpTBXItem15: TSpTBXItem;
+    spiLspLed: TSpTBXItem;
+    vilTabDecorators: TVirtualImageList;
     procedure mnFilesClick(Sender: TObject);
     procedure actEditorZoomInExecute(Sender: TObject);
     procedure actEditorZoomOutExecute(Sender: TObject);
@@ -1295,6 +1312,7 @@ type
     procedure SaveLayout(const Layout : string);
    // IPyIDEServices implementation
     function GetActiveEditor : IEditor;
+    function GetIsClosing: Boolean;
     procedure WriteStatusMsg(const S : string);
     function ShowFilePosition(FileName : string; Line: integer = 0;
       Offset : integer = 1; SelLen : integer = 0;
@@ -1317,7 +1335,6 @@ type
     MenuHelpRequested : Boolean;
     Layouts : TStringList;
     fLanguageList : TStringList;
-    procedure ScaleForPPI(NewPPI: Integer); override;
     procedure StoreApplicationData;
     procedure RestoreApplicationData;
     procedure StoreLocalApplicationData;
@@ -1330,7 +1347,6 @@ type
     procedure DebuggerStateChange(Sender: TObject; OldState,
       NewState: TDebuggerState);
     procedure ApplicationOnIdle(Sender: TObject; var Done: Boolean);
-    procedure DebuggerYield(Sender: TObject; DoIdle : Boolean);
     procedure PyIDEOptionsChanged(Sender: TObject);
     procedure SetupCustomizer;
     procedure SetupLanguageMenu;
@@ -1384,9 +1400,7 @@ uses
   Vcl.Clipbrd,
   Vcl.StdActns,
   Vcl.Themes,
-  JvCreateProcess,
   JclSysInfo,
-  JclFileUtils,
   JclStrings,
   JclSysUtils,
   JvJVCLUtils,
@@ -1431,7 +1445,6 @@ uses
   frmModSpTBXCustomize,
   cTools,
   cParameters,
-  cPythonSourceScanner,
   cFilePersist,
   cCodeHint,
   cInternalPython,
@@ -1439,7 +1452,9 @@ uses
   cProjectClasses,
   dlgPythonVersions,
   dlgRemoteFile,
-  cSSHSupport;
+  cSSHSupport,
+  LspUtils,
+  JediLspClient;
 
 {$R *.DFM}
 
@@ -1466,12 +1481,13 @@ Var
   TabCtrl : TSpTBXTabControl;
 begin
   Result := nil;
+  tbiRecentFileList.MRURemove(AFileName);
   IsRemote :=  TSSHFileName.Parse(AFileName, Server, FName);
 
   // activate the editor if already open
   if IsRemote then
   begin
-    Result :=  GI_EditorFactory.GetEditorByNameOrTitle(AFileName);
+    Result :=  GI_EditorFactory.GetEditorByFileId(AFileName);
     if Assigned(Result) then begin
       Result.Activate;
       Exit;
@@ -1483,6 +1499,10 @@ begin
     Result :=  GI_EditorFactory.GetEditorByName(AFileName);
     if Assigned(Result) then begin
       Result.Activate;
+      Exit;
+    end
+    else if not FileExists(AFileName) then begin
+      WriteStatusMsg(_(Format('File %s does not exist', [AFileName])));
       Exit;
     end;
   end;
@@ -1497,7 +1517,6 @@ begin
           Result.OpenRemoteFile(FName, Server)
         else
           Result.OpenFile(AFileName, HighlighterName);
-        tbiRecentFileList.MRURemove(AFileName);
         Result.Activate;
       except
         Result.Close;
@@ -1533,6 +1552,10 @@ Var
   TabHost : TJvDockTabHostForm;
   LocalOptionsFileName: string;
 begin
+  //Set the HelpFile
+  Application.HelpFile := ExtractFilePath(Application.ExeName) + 'PyScripter.chm';
+  Application.OnHelp := Self.ApplicationHelp;
+
   // SpTBXLib Font
   ToolbarFont.Size := 10;
 
@@ -1676,9 +1699,10 @@ begin
   else
   begin
     TabHost := ManualTabDock(DockServer.LeftDockPanel, FileExplorerWindow, ProjectExplorerWindow);
-    DockServer.LeftDockPanel.Width := PPIScale(200);
+    DockServer.LeftDockPanel.Width := PPIScale(250);
     ManualTabDockAddPage(TabHost, CodeExplorerWindow);
-    TJvDockVSNETPanel(DockServer.LeftDockPanel).DoAutoHideControl(TabHost);
+    ShowDockForm(FileExplorerWindow);
+    //TJvDockVSNETPanel(DockServer.LeftDockPanel).DoAutoHideControl(TabHost);
 
     TabHost := ManualTabDock(DockServer.BottomDockPanel, CallStackWindow, VariablesWindow);
     DockServer.BottomDockPanel.Height := PPIScale(200);
@@ -1711,9 +1735,6 @@ begin
 
   TabControl1.Toolbar.OnMouseDown := TabControlMouseDown;
   TabControl2.Toolbar.OnMouseDown := TabControlMouseDown;
-  //Set the HelpFile
-  Application.HelpFile := ExtractFilePath(Application.ExeName) + 'PyScripter.chm';
-  Application.OnHelp := Self.ApplicationHelp;
 
   //Flicker
   MainMenu.DoubleBuffered := True;
@@ -1757,7 +1778,7 @@ begin
     end;
   end;
 
-  if OutputWindow.JvCreateProcess.State <> psReady then
+  if OutputWindow.IsRunning then
     if StyledMessageDlg(_(SKillExternalTool), mtConfirmation, [mbYes, mbCancel], 0) = mrYes
     then begin
       OutputWindow.actToolTerminateExecute(Self);
@@ -1773,16 +1794,6 @@ begin
   CanClose := CanClose and ProjectExplorerWindow.CanClose;
 
   if CanClose then begin
-    // Shut down CodeExplorerWindow Worker thread
-    CodeExplorerWindow.ShutDownWorkerThread;
-
-    // Disconnect ChangeNotify
-    FileExplorerWindow.FileExplorerTree.Active := False;
-    ConfigureFileExplorer(fcnDisabled, False);
-
-    // Disable CodeHint timer
-    CodeHint.CancelHint;
-
     // Shut down help
     Application.OnHelp := nil;
     // QC25183
@@ -1790,6 +1801,13 @@ begin
       Application.HelpCommand(HELP_QUIT, 0);
     except
     end;
+
+    // Disconnect ChangeNotify
+    FileExplorerWindow.FileExplorerTree.Active := False;
+    ConfigureFileExplorer(fcnDisabled, False);
+
+    // Disable CodeHint timer
+    CodeHint.CancelHint;
 
     // Stop accepting files
     DragAcceptFiles(TabControl1.Handle, False);
@@ -2250,7 +2268,7 @@ begin
     begin
       var Editor := GetActiveEditor;
       if Assigned(Editor) then
-        Caption := Format('PyScripter - %s%s', [Editor.GetFileNameOrTitle,
+        Caption := Format('PyScripter - %s%s', [Editor.FileId,
                              iff(Editor.Modified, '*', '')])
       else
         Caption := 'PyScripter';
@@ -2259,7 +2277,7 @@ end;
 
 procedure TPyIDEMainForm.SetupRunConfiguration(var RunConfig: TRunConfiguration; ActiveEditor: IEditor);
 begin
-  RunConfig.ScriptName := ActiveEditor.GetFileNameOrTitle;
+  RunConfig.ScriptName := ActiveEditor.FileId;
   RunConfig.EngineType := PyControl.PythonEngineType;
   RunConfig.Parameters := iff(PyIDEOptions.UseCommandLine, PyIDEOptions.CommandLine, '');
   RunConfig.ExternalRun.Assign(ExternalPython);
@@ -2426,23 +2444,12 @@ begin
     s := _('Python not available');
     icIndicators.SVGIconItems[0].FixedColor := clGray;
   end;
-  spiStatusLED.Hint := _('Debugger state: ') +s;
+  spiStatusLED.Hint := _('Debugger state: ') + s;
   lbStatusMessage.Caption := ' ' + s;
   StatusBar.Refresh;
 
   CallStackWindow.UpdateWindow(NewState, OldState);  // also updates Variables and Watches
   UpdateDebugCommands(NewState);
-end;
-
-procedure TPyIDEMainForm.DebuggerYield(Sender: TObject; DoIdle : Boolean);
-begin
-  Application.ProcessMessages;
-  if DoIdle then
-    // Application.Idle yields control to other applications
-    // and calls CheckSynchronize which runs synchronized methods initiated in threads
-    Application.DoApplicationIdle
-  else
-    CheckSynchronize;
 end;
 
 procedure TPyIDEMainForm.SaveFileModules;
@@ -2528,14 +2535,14 @@ begin
   if FileName <> '' then begin
     if (FileName[1] ='<') and (FileName[Length(FileName)] = '>') then
       FileName :=  Copy(FileName, 2, Length(FileName)-2);
-    Editor := GI_EditorFactory.GetEditorByNameOrTitle(FileName);
+    Editor := GI_EditorFactory.GetEditorByFileId(FileName);
     if not Assigned(Editor) and (FileName.StartsWith('ssh') or FileExists(FileName)) then begin
       try
         DoOpenFile(FileName, '', TabControlIndex(ActiveTabControl));
       except
         Exit;
       end;
-      Editor := GI_EditorFactory.GetEditorByNameOrTitle(FileName);
+      Editor := GI_EditorFactory.GetEditorByFileId(FileName);
 
       if GI_PyControl.PythonLoaded and
         Editor.FileName.StartsWith(PyControl.PythonVersion.InstallPath, True)
@@ -2816,6 +2823,13 @@ begin
   Result := Self;
 end;
 
+function TPyIDEMainForm.GetIsClosing: Boolean;
+begin
+  // Use Application.OnHelp to signal exit
+  // Application.Help is set to nil as soon as we are about to close
+  Result := not Assigned(Application.OnHelp);
+end;
+
 function TPyIDEMainForm.GetLocalAppStorage: TJvCustomAppStorage;
 begin
   Result := LocalAppStorage;
@@ -2888,7 +2902,15 @@ begin
     lbPythonEngine.Caption := ' ';
   end;
 
-  spiExternalToolsLED.Visible := OutputWindow.JvCreateProcess.State <> psReady;
+  if TJedi.Ready then begin
+    spiLspLed.Hint := _('Language server') + ': ' + _('Ready');
+    icIndicators.SVGIconItems[2].FixedColor := $1F5FFF;
+  end else begin
+    spiLspLed.Hint := _('Language server') + ': ' + _('Not available');
+    icIndicators.SVGIconItems[2].FixedColor := clGray;
+  end;
+
+  spiExternalToolsLED.Visible := OutputWindow.IsRunning;
 end;
 
 function TPyIDEMainForm.CmdLineOpenFiles(): boolean;
@@ -2971,8 +2993,6 @@ begin
     if Assigned(GetActiveEditor()) then
       GetActiveEditor.Activate;
     UpdateCaption;
-    // Start the Python Code scanning thread
-    CodeExplorerWindow.WorkerThread.Start;
   end;
 end;
 
@@ -3230,8 +3250,7 @@ begin
     AppStorage.WriteCollection('SSH', SSHServers, 'Server');
     AppStorage.StorageOptions.StoreDefaultValues := False;
     AppStorage.WritePersistent('Tools\External Run', ExternalPython);
-    AppStorage.WriteString('Output Window\Font Name', OutputWindow.lsbConsole.Font.Name);
-    AppStorage.WriteInteger('Output Window\Font Size', OutputWindow.lsbConsole.Font.Size);
+    AppStorage.WritePersistent('Output Window\Font', OutputWindow.lsbConsole.Font);
     AppStorage.WritePersistent('Watches', WatchesWindow);
     AppStorage.WriteBoolean('Status Bar', StatusBar.Visible);
 
@@ -3414,8 +3433,7 @@ begin
   AppStorage.ReadCollection('Tools', ToolsCollection, True, 'Tool');
   AppStorage.ReadCollection('SSH', SSHServers, True, 'Server');
   AppStorage.ReadPersistent('Tools\External Run', ExternalPython);
-  OutputWindow.lsbConsole.Font.Name := AppStorage.ReadString('Output Window\Font Name', DefaultCodeFontName);
-  OutputWindow.lsbConsole.Font.Size := AppStorage.ReadInteger('Output Window\Font Size', 9);
+  AppStorage.ReadPersistent('Output Window\Font', OutputWindow.lsbConsole.Font);
   OutputWindow.FontOrColorUpdated;
   AppStorage.ReadPersistent('Watches', WatchesWindow);
   StatusBar.Visible := AppStorage.ReadBoolean('Status Bar');
@@ -3530,17 +3548,14 @@ begin
 end;
 
 procedure TPyIDEMainForm.TabControlTabClosing(Sender: TObject; var Allow, CloseAndFree: Boolean);
-Var
-  Editor : IEditor;
 begin
-  Editor := EditorFromTab(Sender as TSpTBXTabItem);
-  if Assigned(Editor) then begin
-    Allow := False;
-    TThread.ForceQueue(nil, procedure
-    begin
+  Allow := False;
+  TThread.ForceQueue(nil, procedure
+  begin
+    var Editor := EditorFromTab(Sender as TSpTBXTabItem);
+    if Assigned(Editor) then
       (Editor as IFileCommands).ExecClose;
-    end);
-  end;
+  end);
 end;
 
 procedure TPyIDEMainForm.TabToolbarlDragDrop(Sender, Source: TObject; X,
@@ -3664,24 +3679,6 @@ begin
 
     RegisterCustomParams;  // To get tranlations of descriptions
   end;
-end;
-
-procedure TPyIDEMainForm.ScaleForPPI(NewPPI: Integer);
-begin
-  // FCurrentPPI is changed to the NewPPI in the inherited method
-  // Status bar
-  StatusBar.Toolbar.Items.ViewBeginUpdate;
-  try
-    lbPythonVersion.MinWidth := MulDiv(lbPythonVersion.MinWidth, NewPPI, FCurrentPPI);
-    lbPythonEngine.MinWidth := MulDiv(lbPythonEngine.MinWidth, NewPPI, FCurrentPPI);
-    lbStatusCaret.CustomWidth := MulDiv(lbStatusCaret.CustomWidth, NewPPI, FCurrentPPI);
-    lbStatusModified.CustomWidth := MulDiv(lbStatusModified.CustomWidth, NewPPI, FCurrentPPI);
-    lbStatusOverwrite.CustomWidth := MulDiv(lbStatusOverwrite.CustomWidth, NewPPI, FCurrentPPI);
-    lbStatusCaps.CustomWidth := MulDiv(lbStatusCaps.CustomWidth, NewPPI, FCurrentPPI);
-  finally
-    StatusBar.ToolBar.Items.ViewEndUpdate;
-  end;
-  inherited;
 end;
 
 procedure TPyIDEMainForm.LoadToolbarItems(const Path : string);
@@ -4290,7 +4287,7 @@ Var
 begin
   Application.ProcessMessages;
   if Assigned(GI_ActiveEditor) then begin
-    FileName := GI_ActiveEditor.GetFileNameOrTitle;
+    FileName := GI_ActiveEditor.FileId;
     CaretXY := GI_ActiveEditor.ActiveSynEdit.CaretXY;
     FindDefinition(GI_ActiveEditor, CaretXY, True, False, True, FilePosInfo);
     AdjustBrowserLists(FileName, CaretXY.Line, CaretXY.Char, FilePosInfo);
@@ -4302,13 +4299,12 @@ procedure TPyIDEMainForm.FindDefinition(Editor : IEditor; TextCoord: TBufferCoor
 var
   Defs : Variant;
   Token : string;
-  FName, FileName, ErrMsg: string;
+  FName, FileName: string;
   TokenType,
-  Start, Line, Col: Integer;
+  Start: Integer;
   Attri: TSynHighlighterAttributes;
   TempCursor : IInterface;
-  CE: TBaseCodeElement;
-  ParsedModule : TParsedModule;
+  BC: TBufferCoord;
 begin
   FilePosInfo := '';
   VarClear(Defs);
@@ -4323,11 +4319,11 @@ begin
                 mtInformation, [mbOK], 0);
             Exit;
           end;
-        Ord(tkIdentifier) :
+        Ord(tkIdentifier), Ord(tkSystemDefined), Ord(tkNonKeyword):
           begin
             TempCursor := WaitCursor;
 
-            FName := Editor.GetFileNameOrTitle;
+            FName := Editor.FileId;
 
             if ShowMessages then begin
               GI_PyIDEServices.Messages.ClearMessages;
@@ -4335,26 +4331,18 @@ begin
             end;
 
             FileName := '';
-            Line := 0;
-            Col := 1;
+            TJedi.FindDefinitionByCoordinates(FName, CaretXY, FileName, BC);
 
-            CE := PyScripterRefactor.FindDefinitionByCoordinates(FName,
-              CaretY, CaretX, ErrMsg);
-            if Assigned(CE) and not CE.IsProxy then begin
-              ParsedModule := CE.GetModule;
-              FileName := ParsedModule.FileName;
-              Line := CE.CodePos.LineNo;
-              Col := CE.CodePos.CharOffset;
-              if ShowMessages then
-                GI_PyIDEServices.Messages.AddMessage(_(SDefinitionFound), FileName, Line, Col);
-            end;
+            if (FileName <> '') and ShowMessages then
+              GI_PyIDEServices.Messages.AddMessage(_(SDefinitionFound), FileName, BC.Line, BC.Char);
 
             if ShowMessages then
               ShowDockForm(MessagesWindow);
+
             if FileName  <> '' then begin
-              FilePosInfo := Format(FilePosInfoFormat, [Filename, Line, Col]);
+              FilePosInfo := Format(FilePosInfoFormat, [Filename, BC.Line, BC.Char]);
               if JumpToFirstMatch then
-                ShowFilePosition(Filename, Line, Col);
+                ShowFilePosition(Filename, BC.Line, BC.Char);
             end else begin
               if ShowMessages then
                 GI_PyIDEServices.Messages.AddMessage(_(SDefinitionNotFound));
@@ -4384,14 +4372,14 @@ end;
 procedure TPyIDEMainForm.actFindReferencesExecute(Sender: TObject);
 var
   Token : string;
-  FName, FileName, ErrMsg : string;
+  FName: string;
   TokenType,
-  Start, Line, Col, i : Integer;
+  Start: Integer;
   Attri: TSynHighlighterAttributes;
-  TempCursor : IInterface;
-  FoundReferences : Boolean;
-  ResultsList : TStringList;
-  RegEx : TRegEx;
+  TempCursor: IInterface;
+  FoundReferences: Boolean;
+  Line: string;
+  References: TArray<TDocPosition>;
 begin
   Application.ProcessMessages;
   TempCursor := WaitCursor;
@@ -4409,26 +4397,13 @@ begin
             GI_PyIDEServices.Messages.ClearMessages;
             GI_PyIDEServices.Messages.AddMessage(_(SReferencesOf) + Token + '"');
 
-            ResultsList := TStringList.Create;
-            try
-              PyScripterRefactor.FindReferencesByCoordinates(FName,
-                CaretY, CaretX, ErrMsg, ResultsList);
-              FoundReferences := ResultsList.Count > 0;
-              RegEx.Create(FilePosInfoRegExpr);
-              i := 0;
-              while i  < ResultsList.Count -1 do begin
-                with RegEx.Match(ResultsList[i]) do
-                  if Success then begin
-                    FileName := GroupValue(1);
-                    Line := StrToInt(GroupValue(2));
-                    Col := StrToInt(GroupValue(3));
-                    GI_PyIDEServices.Messages.AddMessage(ResultsList[i+1],
-                      Filename, Line, Col, Token.Length);
-                  end;
-                Inc(i, 2);
-              end;
-            finally
-              ResultsList.Free;
+            References := TJedi.FindReferencesByCoordinates(FName, CaretXY);
+            FoundReferences := Length(References) > 0;
+            for var DocPosition in References do
+            begin
+              Line := GetNthSourceLine(DocPosition.FileId, DocPosition.Line);
+              GI_PyIDEServices.Messages.AddMessage(Line, DocPosition.FileId,
+                DocPosition.Line, DocPosition.Char, Token.Length);
             end;
 
             ShowDockForm(MessagesWindow);
@@ -4480,7 +4455,7 @@ Var
   Line, Col : integer;
 begin
   if Assigned(GI_ActiveEditor) then begin
-    FileName := GI_ActiveEditor.GetFileNameOrTitle;
+    FileName := GI_ActiveEditor.FileId;
     Line := Msg.LParam;
     Col := Msg.WParam;
     FindDefinition(GI_ActiveEditor, BufferCoord(Col, Line), False,
@@ -4624,11 +4599,12 @@ begin
 
       Result.SynEdit.ClearUndo;
       Result.SynEdit.Modified := False;
+      Result.RefreshSymbols;
 
       TEditorForm(Result.Form).DefaultExtension := FileTemplate.Extension;
       // Jupyter support
       if (LowerCase(FileTemplate.Extension) = 'ipynb') and
-        (OutputWindow.JvCreateProcess.State = psReady) then
+        not OutputWindow.IsRunning then
       begin
         Editor := Result;
         (Editor as IFileCommands).ExecSave;
@@ -4818,7 +4794,6 @@ begin
       OnCurrentPosChange := DebuggerCurrentPosChange;
       OnErrorPosChange := DebuggerErrorPosChange;
       OnStateChange := DebuggerStateChange;
-      OnYield := DebuggerYield;
     end;
 
     // This is needed to update the variables window
@@ -4968,7 +4943,7 @@ begin
   try
     GI_EditorFactory.ApplyToEditors(procedure(Ed: IEditor)
     begin
-      List.AddObject(Ed.GetFileNameOrTitle, TObject(Ed.Form));
+      List.AddObject(Ed.FileId, TObject(Ed.Form));
     end);
     ModifiedImageIndex := vilImages.GetIndexByName('Edit');
     for var I:= 0 to List.Count - 1 do begin
@@ -4977,7 +4952,7 @@ begin
       mnFiles.Add(MenuItem);
       MenuItem.Caption := List[I];
       MenuItem.GroupIndex := 3;
-      MenuItem.Hint := Editor.GetFileNameOrTitle;
+      MenuItem.Hint := Editor.FileId;
       MenuItem.Checked := Editor = ActiveEditor;
       if Editor.Modified then
         MenuItem.ImageIndex := ModifiedImageIndex;

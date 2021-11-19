@@ -33,7 +33,6 @@ type
 
   TBreakpointChangeEvent = procedure(Sender: TObject; Editor : IEditor; ALine: integer) of object;
   TDebuggerStateChangeEvent = procedure(Sender: TObject; OldState, NewState: TDebuggerState) of object;
-  TDebuggerYieldEvent = procedure(Sender: TObject; DoIdle : Boolean) of object;
   TDebuggerPosChangeEvent = procedure(Sender: TObject; const OldPos, NewPos: TEditorPos) of object;
 
   TPythonControl = class(TComponent, IPyControl)
@@ -51,7 +50,6 @@ type
     fOnCurrentPosChange: TDebuggerPosChangeEvent;
     fOnErrorPosChange: TDebuggerPosChangeEvent;
     fOnStateChange: TDebuggerStateChangeEvent;
-    fOnYield: TDebuggerYieldEvent;
     fOnPythonVersionChange: TJclNotifyEventBroadcast;
     fActiveInterpreter: TPyBaseInterpreter;
     fActiveDebugger: TPyBaseDebugger ;
@@ -74,13 +72,17 @@ type
     procedure SetRunConfig(ARunConfig: TRunConfiguration);
     procedure PrepareRun;
     function GetInternalInterpreter: TPyBaseInterpreter;
-    function GetPythonVersion: TPythonVersion;
     procedure SetPythonVersionIndex(const Value: integer);
     // IPyControl implementation
     function PythonLoaded: Boolean;
     function Running: boolean;
     function Inactive: boolean;
+    function GetPythonVersion: TPythonVersion;
+    function GetOnPythonVersionChange: TJclNotifyEventBroadcast;
     function AddPathToInternalPythonPath(const Path: string): IInterface;
+  public
+    const MinPyVersion = '3.6';
+    const MaxPyVersion = '3.10';
   public
     // ActiveInterpreter and ActiveDebugger are created
     // and destroyed in frmPythonII
@@ -99,8 +101,6 @@ type
     function IsBreakpointLine(Editor: IEditor; ALine: integer;
       var Disabled : boolean): boolean;
     function IsExecutableLine(Editor: IEditor; ALine: integer): boolean;
-    // Event processing
-    procedure DoYield(DoIdle : Boolean);
     // Running Python Scripts
     procedure Run(ARunConfig : TRunConfiguration);
     procedure Debug(ARunConfig : TRunConfiguration;  InitStepIn : Boolean = False;
@@ -143,8 +143,7 @@ type
       write fOnErrorPosChange;
     property OnStateChange: TDebuggerStateChangeEvent read fOnStateChange
       write fOnStateChange;
-    property OnYield: TDebuggerYieldEvent read fOnYield write fOnYield;
-    property OnPythonVersionChange: TJclNotifyEventBroadcast read fOnPythonVersionChange;
+    property OnPythonVersionChange: TJclNotifyEventBroadcast read GetOnPythonVersionChange;
   end;
 
 var
@@ -171,7 +170,6 @@ uses
   cPyDebugger,
   cPyRemoteDebugger,
   cProjectClasses,
-  cRefactoring,
   cSSHSupport,
   cPySSHDebugger;
 
@@ -186,7 +184,7 @@ begin
   fErrorPos.Clear;
   fRunConfig := TRunConfiguration.Create;
   fInternalPython := TInternalPython.Create;
-  fRegPythonVersions := GetRegisteredPythonVersions;
+  fRegPythonVersions := GetRegisteredPythonVersions(MinPyVersion, MaxPyVersion);
   fOnPythonVersionChange := TJclNotifyEventBroadcast.Create;
 end;
 
@@ -251,6 +249,11 @@ begin
   end;
 end;
 
+function TPythonControl.GetOnPythonVersionChange: TJclNotifyEventBroadcast;
+begin
+  Result := fOnPythonVersionChange;
+end;
+
 function TPythonControl.GetPythonEngineType: TPythonEngineType;
 begin
   if Assigned(ActiveInterpreter) then
@@ -286,13 +289,7 @@ begin
   // first find an optional parameter specifying the expected Python version in the form of -PYTHONXY
   expectedVersion := '';
 
-  if CmdLineReader.readFlag('PYTHON33') then
-    expectedVersion := '3.3'
-  else if CmdLineReader.readFlag('PYTHON34') then
-    expectedVersion := '3.4'
-  else if CmdLineReader.readFlag('PYTHON35') then
-    expectedVersion := '3.5'
-  else if CmdLineReader.readFlag('PYTHON36') then
+  if CmdLineReader.readFlag('PYTHON36') then
     expectedVersion := '3.6'
   else if CmdLineReader.readFlag('PYTHON37') then
     expectedVersion := '3.7'
@@ -340,7 +337,8 @@ begin
         break;
       end;
     if not Result then begin
-      Result := PythonVersionFromPath(DLLPath, Version);
+      Result := PythonVersionFromPath(DLLPath, Version, True,
+        MinPyVersion, MaxPyVersion);
       if Result then begin
         SetLength(CustomPythonVersions, Length(CustomPythonVersions) + 1);
         CustomPythonVersions[Length(CustomPythonVersions)-1] := Version;
@@ -445,7 +443,7 @@ var
   i: integer;
   BreakPoint : TBreakPoint;
 begin
-  Editor := GI_EditorFactory.GetEditorByNameOrTitle(FileName);
+  Editor := GI_EditorFactory.GetEditorByFileId(FileName);
 
   BreakPoint := nil;
   if Assigned(Editor) and (ALine > 0) then begin
@@ -663,12 +661,6 @@ begin
   end;
 end;
 
-procedure TPythonControl.DoYield(DoIdle : Boolean);
-begin
-  if Assigned(fOnYield) then
-    fOnYield(Self, DoIdle);
-end;
-
 procedure TPythonControl.ExternalRun(ARunConfig: TRunConfiguration);
 begin
   SetRunConfig(ARunConfig);
@@ -737,11 +729,7 @@ Var
   II : Variant;   // wrapping sys and code modules
 begin
   if InternalPython.Loaded then
-  begin
     GI_PyIDEServices.ClearPythonWindows;
-    PyScripterRefactor.Cancel;
-    PyScripterRefactor.ClearProxyModules;
-  end;
 
   // Destroy Active debugger and interpreter
   PyControl.ActiveDebugger := nil;
@@ -838,7 +826,9 @@ begin
         Path := CustomVersions[Index]
       else
          Path := CustomVersions.ValueFromIndex[Index];
-      if PythonVersionFromPath(Path, Version) then
+      if PythonVersionFromPath(Path, Version, True,
+        MinPyVersion, MaxPyVersion)
+      then
       begin
         CustomPythonVersions[Count] := Version;
         if Name <> '' then

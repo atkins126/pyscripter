@@ -1,7 +1,11 @@
 ﻿; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 #define MyAppName "PyScripter"
-#define MyAppVersion "4.0.0"
-#define OSPlatform "x64"
+#ifndef MyAppVersion
+  #define MyAppVersion "4.1.1"
+#endif
+#ifndef OSPlatform
+  #define OSPlatform "x64"
+#endif
 #define MyAppPublisherURL="https://sourceforge.net/projects/pyscripter/"
 #define MyAppSupportURL="https://github.com/pyscripter/pyscripter"
 #define MyAppUpdatesURL="https://sourceforge.net/projects/pyscripter/"
@@ -74,10 +78,14 @@ Source: ..\locale\sk\LC_MESSAGES\default.mo; DestDir: {app}\locale\sk\LC_MESSAGE
 Source: ..\locale\sk\LC_MESSAGES\default.po; DestDir: {app}\locale\sk\LC_MESSAGES\
 Source: ..\locale\sk\LC_MESSAGES\languages.mo; DestDir: {app}\locale\sk\LC_MESSAGES\
 Source: ..\locale\sk\LC_MESSAGES\languages.po; DestDir: {app}\locale\sk\LC_MESSAGES\
-Source: ..\locale\zh\LC_MESSAGES\default.mo; DestDir: {app}\locale\zh\LC_MESSAGES\
-Source: ..\locale\zh\LC_MESSAGES\default.po; DestDir: {app}\locale\zh\LC_MESSAGES\
-Source: ..\locale\zh\LC_MESSAGES\languages.mo; DestDir: {app}\locale\zh\LC_MESSAGES\
-Source: ..\locale\zh\LC_MESSAGES\languages.po; DestDir: {app}\locale\zh\LC_MESSAGES\
+Source: ..\locale\zh_CN\LC_MESSAGES\default.mo; DestDir: {app}\locale\zh_CN\LC_MESSAGES\
+Source: ..\locale\zh_CN\LC_MESSAGES\default.po; DestDir: {app}\locale\zh_CN\LC_MESSAGES\
+Source: ..\locale\zh_CN\LC_MESSAGES\languages.mo; DestDir: {app}\locale\zh_CN\LC_MESSAGES\
+Source: ..\locale\zh_CN\LC_MESSAGES\languages.po; DestDir: {app}\locale\zh_CN\LC_MESSAGES\
+Source: ..\locale\zh_TW\LC_MESSAGES\default.mo; DestDir: {app}\locale\zh_TW\LC_MESSAGES\
+Source: ..\locale\zh_TW\LC_MESSAGES\default.po; DestDir: {app}\locale\zh_TW\LC_MESSAGES\
+Source: ..\locale\zh_TW\LC_MESSAGES\languages.mo; DestDir: {app}\locale\zh_TW\LC_MESSAGES\
+Source: ..\locale\zh_TW\LC_MESSAGES\languages.po; DestDir: {app}\locale\zh_TW\LC_MESSAGES\
 Source: ..\locale\es\LC_MESSAGES\default.mo; DestDir: {app}\locale\es\LC_MESSAGES\
 Source: ..\locale\es\LC_MESSAGES\default.po; DestDir: {app}\locale\es\LC_MESSAGES\
 Source: ..\locale\es\LC_MESSAGES\languages.mo; DestDir: {app}\locale\es\LC_MESSAGES\
@@ -196,7 +204,12 @@ Source: "..\Styles\Windows10ClearDay.vsf"; DestDir: "{commonappdata}\PyScripter\
 Source: "..\Styles\Windows10Dark.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Windows10Malibu.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Windows10SlateGray.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
+Source: "..\Styles\Windows11_Dark.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
+Source: "..\Styles\Windows11_Light.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Zircon.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
+; Language Server
+Source: "..\Lib\Lsp\jls\jedilsp.exe"; DestDir: "{commonappdata}\PyScripter\Lsp\jls"; 
+Source: "..\Lib\Lsp\jls\run-jedi-language-server.py"; DestDir: "{commonappdata}\PyScripter\Lsp\jls"
 
 [Icons]
 Name: {group}\PyScripter; Filename: {app}\PyScripter.exe
@@ -219,6 +232,11 @@ Root: HKLM; Subkey: "Software\Microsoft\Internet Explorer\Main\FeatureControl\FE
 
 [Run]
 Filename: {app}\PyScripter.exe; Description: {cm:LaunchProgram,PyScripter}; Flags: nowait postinstall skipifsilent
+FileName: "cmd"; Parameters: "/c IF EXIST jedilsp\NUL rmdir jedilsp /s /q"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; Flags: runhidden
+Filename: {commonappdata}\PyScripter\Lsp\jls\JediLsp.exe; Parameters: "-y"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; Flags: runhidden
+
+[UninstallRun]
+FileName: "cmd";Parameters: "/c IF EXIST jedilsp\NUL rmdir jedilsp /s /q"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; RunOnceId: "DelLspDir"; Flags: runhidden 
 
 [CustomMessages]
 #include "locale\en\InstallMessages.txt"

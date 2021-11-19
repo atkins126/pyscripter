@@ -467,7 +467,10 @@ begin
   SynEdit.BeginUpdate;
   try
     SynEdit.ExecuteCommand(ecEditorBottom, ' ', nil);
-    SynEdit.SelText := S;
+    if Pos(#0, S) > 0 then
+      SynEdit.SelText := StrStripChar(S, #0)
+    else
+      SynEdit.SelText := S;
     SynEdit.ExecuteCommand(ecEditorBottom, ' ', nil);
     SynEdit.EnsureCursorPosVisible;
   finally
@@ -864,10 +867,10 @@ begin
     begin
       Caret := SynEdit.CaretXY;
       TThread.ForceQueue(nil, procedure
-      begin
-        DoCodeCompletion(SynEdit, Caret);
-      end,
-      CommandsDataModule.SynCodeCompletion.TimerInterval);
+        begin
+          DoCodeCompletion(SynEdit, Caret);
+        end, IfThen(AChar = '.', 200,
+        CommandsDataModule.SynCodeCompletion.TimerInterval));
     end;
   end;
 
@@ -1307,27 +1310,15 @@ begin
   var CC := TIDECompletion.InterpreterCodeCompletion;
   var CP := TSynCompletionProposal(Sender);
 
-  if not CC.Lock.TryEnter then
-  begin
-    CanExecute := False;
-    Exit;
-  end;
+  CanExecute := False;
+  if CC.Lock.TryEnter then
   try
     CanExecute := Application.Active and
       (GetParentForm(SynEdit).ActiveControl = SynEdit) and
       (CC.CompletionInfo.CaretXY = SynEdit.CaretXY);
-  finally
-    cc.Lock.Leave;
-  end;
 
-  if CanExecute then
-  begin
-    if not CC.Lock.TryEnter then
+    if CanExecute then
     begin
-      CanExecute := False;
-      Exit;
-    end;
-    try
       CP.Font := PyIDEOptions.AutoCompletionFont;
       CP.FontsAreScaled := True;
       CP.ItemList.Text := CC.CompletionInfo.DisplayText;
@@ -1348,13 +1339,13 @@ begin
         CP.OnValidate(CP.Form, [], #0);
         CC.CleanUp;
       end;
-    finally
-      CC.Lock.Leave;
+    end else begin
+      CP.ItemList.Clear;
+      CP.InsertList.Clear;
+      CC.CleanUp;
     end;
-  end else begin
-    CP.ItemList.Clear;
-    CP.InsertList.Clear;
-    CC.CleanUp;
+  finally
+    CC.Lock.Leave;
   end;
 end;
 
