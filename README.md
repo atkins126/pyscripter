@@ -8,9 +8,8 @@ languages.
 * [Screenshots](https://github.com/pyscripter/pyscripter/wiki/Screenshots)
 * [Blog](https://pyscripter.blogspot.com/)
 * [Support](https://groups.google.com/forum/#!forum/pyscripter)
+* [Licence: MIT](https://github.com/pyscripter/pyscripter/blob/master/LICENSE)
 * [![paypal](https://img.shields.io/badge/Donate-PayPal-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SX9B6G2GF5K4U)
-
-Licence: MIT
 
 ![Screenshot](https://raw.githubusercontent.com/wiki/pyscripter/pyscripter/images/CodeFolding.jpg)
 

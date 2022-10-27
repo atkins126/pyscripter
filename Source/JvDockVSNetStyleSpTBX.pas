@@ -139,6 +139,7 @@ Uses
   System.Math,
   System.Types,
   Vcl.Forms,
+  Vcl.Themes,
   JvDockVIDStyle,
   SpTBXDkPanels,
   SpTBXItem,
@@ -266,16 +267,16 @@ begin
       R.Offset(PPIScale(1), PPIScale(1));
 
     if AZone.AutoHideBtnState = TJvDockBtnState.bsNormal then begin
-      PatternColor := CurrentSkin.GetTextColor(skncDockablePanelTitleBar, sknsNormal);
+      PatternColor := CurrentSkin.GetTextColor(nil, skncDockablePanelTitleBar, sknsNormal);
       if PatternColor = clNone then
-        PatternColor := CurrentSkin.GetTextColor(skncToolbarItem, sknsNormal);
+        PatternColor := CurrentSkin.GetTextColor(nil, skncToolbarItem, sknsNormal);
       if PatternColor = clNone then
         PatternColor := clCaptionText;
     end else begin
       SkinState := CurrentSkin.GetState(True, AZone.AutoHideBtnState = bsDown, AZone.AutoHideBtnState = bsUp, False);
       //CurrentSkin.PaintBackground(Canvas, R, skncToolbarItem, SkinState, True, True);
-      SpDrawXPToolbarButton(Canvas, R, SkinState, cpNone, FCurrentPPI);
-      PatternColor := CurrentSkin.GetTextColor(skncToolbarItem, SkinState);
+      SpDrawXPToolbarButton(nil, Canvas, R, SkinState, cpNone, FCurrentPPI);
+      PatternColor := CurrentSkin.GetTextColor(nil, skncToolbarItem, SkinState);
     end;
 
     if DockSite.Align in [alLeft, alRight, alTop, alBottom] then
@@ -318,16 +319,16 @@ begin
       R.Offset(PPIScale(1), PPIScale(1));
 
     if AZone.CloseBtnState = TJvDockBtnState.bsNormal then begin
-      PatternColor := CurrentSkin.GetTextColor(skncDockablePanelTitleBar, sknsNormal);
+      PatternColor := CurrentSkin.GetTextColor(nil, skncDockablePanelTitleBar, sknsNormal);
       if PatternColor = clNone then
-        PatternColor := CurrentSkin.GetTextColor(skncToolbarItem, sknsNormal);
+        PatternColor := CurrentSkin.GetTextColor(nil, skncToolbarItem, sknsNormal);
       if PatternColor = clNone then
         PatternColor := clCaptionText;
     end else begin
       SkinState := CurrentSkin.GetState(True, AZone.CloseBtnState = bsDown, AZone.CloseBtnState = bsUp, False);
-      SpDrawXPToolbarButton(Canvas, R, SkinState, cpNone, FCurrentPPI);
+      SpDrawXPToolbarButton(nil, Canvas, R, SkinState, cpNone, FCurrentPPI);
       //CurrentSkin.PaintBackground(Canvas, R, skncToolbarItem, SkinState, True, True);
-      PatternColor := CurrentSkin.GetTextColor(skncToolbarItem, SkinState);
+      PatternColor := CurrentSkin.GetTextColor(nil, skncToolbarItem, SkinState);
     end;
 
     SpDrawGlyphPattern(Canvas, R, gptClose, PatternColor, FCurrentPPI);
@@ -376,8 +377,8 @@ begin
   CRect := DrawRect;
 
   // Draw Background
-  SpDrawXPDock(Canvas, ARect, False, FCurrentPPI);
-  SpDrawXPDockablePanelTitleBar(Canvas, DrawRect, False, False, FCurrentPPI);
+  SpDrawXPDock(nil, Canvas, ARect, False, FCurrentPPI);
+  SpDrawXPDockablePanelTitleBar(nil, Canvas, DrawRect, False, False, FCurrentPPI);
 
   if ShowCloseButtonOnGrabber then
     DrawCloseButton(Canvas, FindControlZone(Control),
@@ -399,9 +400,9 @@ begin
 
   Canvas.Brush.Style := bsClear; // body already painted
   State := CurrentSkin.GetState(True, False, False, False);
-  TextColor := CurrentSkin.GetTextColor(skncDockablePanelTitleBar, State);
+  TextColor := CurrentSkin.GetTextColor(nil, skncDockablePanelTitleBar, State);
   if TextColor = clNone then
-    TextColor := CurrentSkin.GetTextColor(skncToolbarItem, State);
+    TextColor := CurrentSkin.GetTextColor(nil, skncToolbarItem, State);
   if TextColor = clNone then
     TextColor := clCaptionText;
   Canvas.Font.Color := TextColor;
@@ -422,11 +423,11 @@ begin
   else
     InflateRect(R, 2, -1);
   OffsetRect(R, 1, 1);
-  FrameBrush := CreateSolidBrush(ColorToRGB(CurrentSkin.GetThemedSystemColor(clBtnHighlight)));
+  FrameBrush := CreateSolidBrush(ColorToRGB(StyleServices.GetSystemColor(clBtnHighlight)));
   FrameRect(Canvas.Handle, R, FrameBrush);
   DeleteObject(FrameBrush);
   OffsetRect(R, -2, -2);
-  FrameBrush := CreateSolidBrush(ColorToRGB(CurrentSkin.GetThemedSystemColor(clBtnShadow)));
+  FrameBrush := CreateSolidBrush(ColorToRGB(StyleServices.GetSystemColor(clBtnShadow)));
   FrameRect(Canvas.Handle, R, FrameBrush);
   DeleteObject(FrameBrush);
 end;
@@ -453,7 +454,7 @@ begin
   IsVertical := ARect.Right - ARect.Left < ARect.Bottom - ARect.Top;
 
   // Paint background
-  Canvas.Brush.Color := CurrentSkin.GetThemedSystemColor(clBtnFace);
+  Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
   Canvas.FillRect(ARect);
   PaintSplitterFrame(Canvas, IsVertical, R);
 
@@ -465,8 +466,8 @@ begin
   else
     InflateRect(DragHandleR, -10, -1);
 
-  C1 := CurrentSkin.GetThemedSystemColor(clBtnShadow);
-  C2 := CurrentSkin.GetThemedSystemColor(clWindow);
+  C1 := StyleServices.GetSystemColor(clBtnShadow);
+  C2 := StyleServices.GetSystemColor(clWindow);
   SpDrawXPGrip(Canvas, DragHandleR, C1, C2, FCurrentPPI);
 end;
 
@@ -692,7 +693,7 @@ begin
   end;
 
   // Paint the toolbar background
-  SpDrawXPTabControlBackground(Canvas, DockRect, clBtnFace, Position = ttpBottom);
+  SpDrawXPTabControlBackground(nil, Canvas, DockRect, clBtnFace, Position = ttpBottom);
 
   CompleteWidth := TabLeftOffset;
 
@@ -729,7 +730,7 @@ begin
           Inc(R.Bottom, Page.PPIScale(4));
           // maintain background border
           if IsActive then begin
-            SpDrawXPTab(Canvas, R, True, IsActive, False, False, Position, FCurrentPPI);
+            SpDrawXPTab(nil, Canvas, R, True, IsActive, False, False, Position, FCurrentPPI);
             ExcludeClipRect(Canvas.Handle, R.Left + 1, ARect.Bottom - TabSheetBorderSize, R.Right - 1, ARect.Bottom);
           end;
           Dec(R.Bottom, Page.PPIScale(3));
@@ -738,7 +739,7 @@ begin
         begin
           Dec(R.Top, Page.PPIScale(4));
           if IsActive then begin
-            SpDrawXPTab(Canvas, R, True, IsActive, False, False, Position, FCurrentPPI);
+            SpDrawXPTab(nil, Canvas, R, True, IsActive, False, False, Position, FCurrentPPI);
             ExcludeClipRect(Canvas.Handle, R.Left + 1, 0, R.Right - 1, TabSheetBorderSize);
           end;
           Inc(R.Top, Page.PPIScale(3));
@@ -749,7 +750,7 @@ begin
         ttpTop: Inc(R.Top, Page.PPIScale(TabSheetBorderSize));
         ttpBottom: Dec(R.Bottom, Page.PPIScale(TabSheetBorderSize));
       end;
-    SpDrawXPTab(Canvas, R, True, IsActive, IsHot, False, Position, FCurrentPPI);
+    SpDrawXPTab(nil, Canvas, R, True, IsActive, IsHot, False, Position, FCurrentPPI);
 
     // now paint the caption
     Format := DT_LEFT or DT_SINGLELINE{ or DT_END_ELLIPSIS};
@@ -777,7 +778,7 @@ begin
 
     CaptionString := Page.Pages[I].Caption;
     State := CurrentSkin.GetState(True, False, IsHot, IsActive);
-    TextColor := CurrentSkin.GetTextColor(skncTab, State);
+    TextColor := CurrentSkin.GetTextColor(nil, skncTab, State);
     if TextColor = clNone then
       TextColor := clBtnText;
     Canvas.Font.Color := TextColor;
@@ -815,7 +816,7 @@ begin
     Inc(CompleteWidth, CurrTabWidth + TabSplitterWidth);
   end;
   // Paint one side of the TabSheet background after drawing the tabs;
-  SpDrawXPTabControlBackground(Canvas, BgRect, Color, Page.TabPosition = tpBottom);
+  SpDrawXPTabControlBackground(nil, Canvas, BgRect, Color, Page.TabPosition = tpBottom);
 end;
 
 procedure TJvDockVSNETTabPanelSpTBX.WMSpSkinChange(var Message: TMessage);
@@ -853,7 +854,7 @@ begin
       IsVertical := R.Right - R.Left < R.Bottom - R.Top;
 
       // Paint background
-      Canvas.Brush.Color := CurrentSkin.GetThemedSystemColor(clBtnFace);
+      Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
       Canvas.FillRect(R);
 
       PaintSplitterFrame(Canvas, IsVertical, R);
@@ -949,7 +950,7 @@ var
       IsHot := TCrackJvDockVSBlock(Block).ActiveDockControl = Block.VSPane[I].DockForm;
       IsChecked := Block.VSPane[I].Active;
       State := CurrentSkin.GetState(True, False, IsHot, IsChecked);
-      SpDrawXPButton(Canvas, DrawRect, True, False, IsHot, IsChecked, False, False, FCurrentPPI);
+      SpDrawXPButton(nil, Canvas, DrawRect, True, False, IsHot, IsChecked, False, False, FCurrentPPI);
 
       AdjustImagePos;
       SpDrawVirtualImageList(Canvas, R, Block.ImageList, I, True);
@@ -974,7 +975,7 @@ var
         OldGraphicsMode := SetGraphicsMode(Canvas.Handle, GM_ADVANCED);
         Canvas.Brush.Style := bsClear;
 
-        TextColor := CurrentSkin.GetTextColor(skncButton, State);
+        TextColor := CurrentSkin.GetTextColor(nil, skncButton, State);
         if TextColor = clNone then
           TextColor := clBtnText;
         Canvas.Font.Color := TextColor;
@@ -1001,7 +1002,7 @@ begin
   end;
 
   IsVertical := Align in [alLeft, alRight];
-  SpDrawXPDock(Canvas, ClientRect, IsVertical, FCurrentPPI);
+  SpDrawXPDock(nil, Canvas, ClientRect, IsVertical, FCurrentPPI);
   CurrentSkin.PaintBackground(Canvas, ClientRect, skncDock, sknsNormal, True, True, IsVertical);
 
   CurrentPos := BlockStartOffset;
@@ -1121,7 +1122,7 @@ begin
   IsVertical := Align in [alLeft, alRight];
 
   // Paint background
-  Canvas.Brush.Color := CurrentSkin.GetThemedSystemColor(clBtnFace);
+  Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
   Canvas.FillRect(ClientRect);
 
   PaintSplitterFrame(Canvas, IsVertical, R);
@@ -1134,8 +1135,8 @@ begin
   else
     InflateRect(DragHandleR, -PPIScale(10), -PPIScale(1));
 
-    C1 := CurrentSkin.GetThemedSystemColor(clBtnShadow);
-    C2 := CurrentSkin.GetThemedSystemColor(clWindow);
+    C1 := StyleServices.GetSystemColor(clBtnShadow);
+    C2 := StyleServices.GetSystemColor(clWindow);
     SpDrawXPGrip(Canvas, DragHandleR, C1, C2, FCurrentPPI);
 
 //  //uncomment this is you want the dotted frame drawn at designtime
@@ -1232,7 +1233,7 @@ begin
           else
             Dec(R.Top, TabSheetBorderSize);
 
-          SpDrawXPTabControlBackground(ACanvas, R, Color, (PageControl as TJvDockVSNETTabPageControlSpTBX).TabPosition = tpBottom);
+          SpDrawXPTabControlBackground(nil, ACanvas, R, Color, (PageControl as TJvDockVSNETTabPageControlSpTBX).TabPosition = tpBottom);
         finally
           ACanvas.Handle := 0;
           ACanvas.Free;
