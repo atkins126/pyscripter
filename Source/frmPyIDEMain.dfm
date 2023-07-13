@@ -3,7 +3,7 @@ object PyIDEMainForm: TPyIDEMainForm
   Top = 115
   HelpContext = 100
   Caption = 'Python Scripter'
-  ClientHeight = 537
+  ClientHeight = 527
   ClientWidth = 868
   Color = clWindow
   Ctl3D = False
@@ -20,7 +20,7 @@ object PyIDEMainForm: TPyIDEMainForm
   TextHeight = 15
   object StatusBar: TSpTBXStatusBar
     Left = 0
-    Top = 512
+    Top = 502
     Width = 868
     Height = 25
     SizeGrip = False
@@ -108,7 +108,7 @@ object PyIDEMainForm: TPyIDEMainForm
     Left = 9
     Top = 85
     Width = 850
-    Height = 418
+    Height = 408
     Align = alClient
     BevelEdges = []
     BevelOuter = bvNone
@@ -118,7 +118,7 @@ object PyIDEMainForm: TPyIDEMainForm
       Left = 0
       Top = 0
       Width = 846
-      Height = 418
+      Height = 408
       Align = alClient
       PopupMenu = TabControlPopupMenu
       OnContextPopup = TabContolContextPopup
@@ -163,7 +163,6 @@ object PyIDEMainForm: TPyIDEMainForm
       object tbiTabClose: TSpTBXItem
         Tag = 1
         Action = CommandsDataModule.actFileClose
-        ImageName = 'TabClose'
         Options = [tboToolbarStyle]
       end
     end
@@ -171,7 +170,7 @@ object PyIDEMainForm: TPyIDEMainForm
       Left = 846
       Top = 0
       Width = 0
-      Height = 418
+      Height = 408
       Align = alRight
       PopupMenu = TabControlPopupMenu
       Visible = False
@@ -224,7 +223,7 @@ object PyIDEMainForm: TPyIDEMainForm
       Left = 846
       Top = 0
       Width = 4
-      Height = 418
+      Height = 408
       Cursor = crSizeWE
       Align = alRight
       ParentColor = False
@@ -581,6 +580,9 @@ object PyIDEMainForm: TPyIDEMainForm
         object mnZoomOut: TSpTBXItem
           Action = actEditorZoomOut
         end
+        object mnResetZoom: TSpTBXItem
+          Action = actEditorZoomReset
+        end
         object N10: TSpTBXSeparatorItem
         end
         object mnuToolbars: TSpTBXSubmenuItem
@@ -733,7 +735,7 @@ object PyIDEMainForm: TPyIDEMainForm
           object mnNoSyntax: TSpTBXItem
             Caption = '&No Syntax'
             Hint = 'Do not use syntax highlighting'
-            OnClick = mnNoSyntaxClick
+            OnClick = mnSyntaxClick
           end
         end
         object TBXSeparatorItem21: TSpTBXSeparatorItem
@@ -779,12 +781,10 @@ object PyIDEMainForm: TPyIDEMainForm
         Caption = '&Project'
         object mnProjectNew: TSpTBXItem
           Action = ProjectExplorerWindow.actProjectNew
-          ImageName = 'Print'
           Images = ProjectExplorerWindow.vilImages
         end
         object mnProjectOpen: TSpTBXItem
           Action = ProjectExplorerWindow.actProjectOpen
-          ImageName = 'Undo'
           Images = ProjectExplorerWindow.vilImages
         end
         object SpTBXSubmenuItem1: TSpTBXSubmenuItem
@@ -799,7 +799,6 @@ object PyIDEMainForm: TPyIDEMainForm
         end
         object mnProjectSave: TSpTBXItem
           Action = ProjectExplorerWindow.actProjectSave
-          ImageName = 'Delete'
           Images = ProjectExplorerWindow.vilImages
         end
         object mnProjectSaveAs: TSpTBXItem
@@ -1358,7 +1357,7 @@ object PyIDEMainForm: TPyIDEMainForm
     Left = 0
     Top = 85
     Width = 9
-    Height = 418
+    Height = 408
     FixAlign = True
     PopupMenu = ToolbarPopupMenu
     Position = dpLeft
@@ -1368,7 +1367,7 @@ object PyIDEMainForm: TPyIDEMainForm
     Left = 859
     Top = 85
     Width = 9
-    Height = 418
+    Height = 408
     FixAlign = True
     PopupMenu = ToolbarPopupMenu
     Position = dpRight
@@ -1376,7 +1375,7 @@ object PyIDEMainForm: TPyIDEMainForm
   end
   object TBXDockBottom: TSpTBXDock
     Left = 0
-    Top = 503
+    Top = 493
     Width = 868
     Height = 9
     FixAlign = True
@@ -1424,7 +1423,7 @@ object PyIDEMainForm: TPyIDEMainForm
   end
   object TabControlPopupMenu: TSpTBXPopupMenu
     Images = vilImages
-    Left = 312
+    Left = 336
     Top = 282
     object mnNewModule2: TSpTBXItem
       Action = actFileNewModule
@@ -1474,8 +1473,8 @@ object PyIDEMainForm: TPyIDEMainForm
   end
   object RunningProcessesPopUpMenu: TSpTBXPopupMenu
     LinkSubitems = OutputWindow.RunningProcess
-    Left = 172
-    Top = 280
+    Left = 188
+    Top = 282
   end
   object JvAppInstances: TJvAppInstances
     Active = False
@@ -1493,7 +1492,7 @@ object PyIDEMainForm: TPyIDEMainForm
     Images = vilImages
     LinkSubitems = mnuToolbars
     Left = 40
-    Top = 280
+    Top = 282
   end
   object JvFormStorage: TJvFormStorage
     Active = False
@@ -2359,6 +2358,16 @@ object PyIDEMainForm: TPyIDEMainForm
       ImageName = 'Download'
       OnExecute = actRemoteFileOpenExecute
     end
+    object actEditorZoomReset: TAction
+      Category = 'View'
+      Caption = '&Reset Zoom'
+      HelpType = htContext
+      Hint = 'Reset the font size of the editor to its default'
+      ImageIndex = 103
+      ImageName = 'ZoomReset'
+      ShortCut = 32864
+      OnExecute = actEditorZoomResetExecute
+    end
   end
   object LocalAppStorage: TJvAppIniFileStorage
     StorageOptions.BooleanStringTrueValues = 'TRUE, YES, Y'
@@ -2888,8 +2897,13 @@ object PyIDEMainForm: TPyIDEMainForm
         CollectionIndex = 105
         CollectionName = 'SpellCheck'
         Name = 'SpellCheck'
+      end
+      item
+        CollectionIndex = 141
+        CollectionName = 'ZoomReset'
+        Name = 'ZoomReset'
       end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    ImageCollection = ResourcesDataModule.icSVGImages
     PreserveItems = True
     Width = 20
     Height = 20
@@ -2970,7 +2984,7 @@ object PyIDEMainForm: TPyIDEMainForm
         CollectionName = 'Lock'
         Name = 'Lock'
       end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    ImageCollection = ResourcesDataModule.icSVGImages
     PreserveItems = True
     Width = 14
     Height = 14

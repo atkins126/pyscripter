@@ -1,4 +1,3 @@
-unit cFilePersist;
 {-----------------------------------------------------------------------------
  Unit Name: cFilePersist
  Author:    Kiriakos Vlahos
@@ -6,6 +5,8 @@ unit cFilePersist;
  Purpose:   Support class for editor file persistence
  History:
 -----------------------------------------------------------------------------}
+
+unit cFilePersist;
 
 interface
 Uses
@@ -38,11 +39,11 @@ Type
     Highlighter : string;
     UseCodeFolding: Boolean;
     EditorOptions : TSynEditorOptionsContainer;
+    EditorOptions2 : TSynEditorOptionsContainer;
     SecondEditorVisible : Boolean;
     SecondEditorAlign : TAlign;
     SecondEditorSize : integer;
     SecondEditorUseCodeFolding: Boolean;
-    EditorOptions2 : TSynEditorOptionsContainer;
     ReadOnly : Boolean;
     FoldState : string;
     FoldState2 : string;
@@ -90,7 +91,7 @@ uses
   SpTBXTabs,
   TB2Item,
   JvJCLUtils,
-  dmCommands,
+  dmResources,
   frmPyIDEMain,
   uHighlighterProcs,
   cPyBaseDebugger,
@@ -128,7 +129,7 @@ begin
    AppStorage.WriteBoolean(BasePath+'\SecondEditorVisible', SecondEditorVisible);
    IgnoreProperties := TStringList.Create;
    try
-     IgnoreProperties.Add('Keystrokes');
+     IgnoreProperties.AddStrings(['Keystrokes', 'TrackChanges', 'SelectedColor', 'IndentGuides']);
      AppStorage.WritePersistent(BasePath+'\Editor Options', EditorOptions,
        True, IgnoreProperties);
      if SecondEditorVisible then begin
@@ -162,6 +163,7 @@ begin
    ReadOnly := AppStorage.ReadBoolean(BasePath+'\ReadOnly', False);
    EditorOptions.Assign(cPyScripterSettings.EditorOptions);
    AppStorage.ReadPersistent(BasePath+'\Editor Options', EditorOptions, True, True);
+   EditorOptions.Options := EditorOptions.Options + [eoBracketsHighlight, eoAccessibility];
 
    SecondEditorVisible := AppStorage.ReadBoolean(BasePath+'\SecondEditorVisible', False);
    if SecondEditorVisible then begin
@@ -320,20 +322,18 @@ begin
           with TBookMarkInfo(FilePersistInfo.BookMarks[j]) do
             Editor.SynEdit.SetBookMark(BookMarkNumber, Char, Line);
         if FilePersistInfo.Highlighter <> '' then begin
-          Editor.SynEdit.Highlighter := GetHighlighterFromLanguageName(
-            FilePersistInfo.Highlighter, CommandsDataModule.Highlighters);
+          Editor.SynEdit.Highlighter := ResourcesDataModule.Highlighters.
+           HighlighterFromFriendlyName(FilePersistInfo.Highlighter);
           Editor.SynEdit2.Highlighter := Editor.SynEdit.Highlighter;
         end;
-        Editor.SynEdit.Assign(FilePersistInfo.EditorOptions);
         RestoreFoldInfo(Editor.SynEdit, FilePersistInfo.UseCodeFolding, FilePersistInfo.FoldState);
+        Editor.SynEdit.Assign(FilePersistInfo.EditorOptions);
         Editor.ReadOnly := FilePersistInfo.ReadOnly;
 
         if FilePersistInfo.SecondEditorVisible then begin
-          Editor.SynEdit2.Assign(FilePersistInfo.EditorOptions2);
           RestoreFoldInfo(Editor.SynEdit2, FilePersistInfo.SecondEditorUseCodeFolding,
             FilePersistInfo.FoldState2);
-
-          Editor.SynEdit2.UseCodeFolding := FilePersistInfo.SecondEditorUseCodeFolding;
+          Editor.SynEdit2.Assign(FilePersistInfo.EditorOptions2);
 
           if FilePersistInfo.SecondEditorAlign = alRight then begin
             Editor.SplitEditorVertrically;
@@ -391,32 +391,16 @@ begin
 end;
 
 procedure TPersistFileInfo.GetFileInfo;
-
-  procedure ProcessTabControl(TabControl : TSpTBXCustomTabControl);
-  var
-    I: Integer;
-    IV: TTBItemViewer;
-    Editor : IEditor;
-    FilePersistInfo : TFilePersistInfo;
-  begin
-    // Note that the Pages property may have a different order than the
-    // physical order of the tabs
-    for I := 0 to TabControl.View.ViewerCount - 1 do begin
-      IV := TabControl.View.Viewers[I];
-      if IV.Item is TSpTBXTabItem then begin
-        Editor := PyIDEMainForm.EditorFromTab(TSpTBXTabItem(IV.Item));
-        if Assigned(Editor) and ((Editor.FileName <> '') or (Editor.RemoteFileName <> '')) then begin
-          FilePersistInfo := TFilePersistInfo.CreateFromEditor(Editor);
-          fFileInfoList.Add(FilePersistInfo);
-          // We need to do it here before we call SaveEnvironement
-          GI_PyIDEServices.MRUAddEditor(Editor);
-        end;
-      end;
-    end;
-  end;
 begin
-  ProcessTabControl(PyIDEMainForm.TabControl1);
-  ProcessTabControl(PyIDEMainForm.TabControl2);
+  GI_EditorFactory.ApplyToEditors(procedure(Editor: IEditor)
+  begin
+    if Assigned(Editor) and ((Editor.FileName <> '') or (Editor.RemoteFileName <> '')) then begin
+      var FilePersistInfo := TFilePersistInfo.CreateFromEditor(Editor);
+      fFileInfoList.Add(FilePersistInfo);
+      // We need to do it here before we call StoreApplicationData
+      GI_PyIDEServices.MRUAddEditor(Editor);
+    end;
+  end);
 end;
 
 { TTabsPersistInfo }
@@ -428,17 +412,15 @@ Var
   Size : integer;
   Alignment : TAlign;
 begin
-  with PyIDEMainForm do begin
-    IsVisible := AppStorage.ReadBoolean(BasePath+'\Visible', False);
-    if IsVisible then begin
-      Alignment := alRight;
-      AppStorage.ReadEnumeration(BasePath+'\Align', TypeInfo(TAlign),
-        Alignment, Alignment);
-      Size := AppStorage.ReadInteger(BasePath+'\Size', -1);
-      SplitWorkspace(True, Alignment, Size);
-    end else
-      SplitWorkspace(False);
-  end;
+  IsVisible := AppStorage.ReadBoolean(BasePath+'\Visible', False);
+  if IsVisible then begin
+    Alignment := alRight;
+    AppStorage.ReadEnumeration(BasePath+'\Align', TypeInfo(TAlign),
+      Alignment, Alignment);
+    Size := AppStorage.ReadInteger(BasePath+'\Size', -1);
+    PyIDEMainForm.SplitWorkspace(True, Alignment, Size);
+  end else
+    PyIDEMainForm.SplitWorkspace(False);
 end;
 
 procedure TTabsPersistInfo.WriteToAppStorage(AppStorage: TJvCustomAppStorage;

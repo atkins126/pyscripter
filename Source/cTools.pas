@@ -171,10 +171,8 @@ uses
   Vcl.Menus,
   JclStrings,
   JvGnuGetText,
-  cParameters,
   uEditAppIntfs,
-  uCommonFunctions,
-  cPyScripterSettings;
+  uCommonFunctions;
 
 
 function ExpandEnv(const S: string): string;
@@ -196,7 +194,7 @@ end;
 function PrepareCommandLine(S: string): string;
 begin
   S := ExpandEnv(S);
-  S:= Parameters.ReplaceInText(S);
+  S:= GI_PyIDEServices.ReplaceParams(S);
   Result := Trim(S);
 end;
 
@@ -224,7 +222,7 @@ end;
 
 function TToolItem.GetDisplayName: string;
 begin
-  Result := StrRemoveChars(_(fExternalTool.Caption), ['&']);
+  Result := StripHotKey(_(fExternalTool.Caption));
 end;
 
 { TExternalTool }
@@ -451,6 +449,23 @@ initialization
     ParseMessages := False;
     CaptureOutput := False;
     ConsoleHidden := True;
+    Utf8IO := True;
+  end;
+
+  with (ToolsCollection.Add as TToolItem).ExternalTool do begin
+    Caption := _('Format Selection');
+    Description := _('Format selected code using the "black" module');
+    ApplicationName := '$[PythonExe-Short]';
+    Parameters := '-m black -';
+    ShortCut := Vcl.Menus.Shortcut(Ord('F'), [ssShift, ssAlt]);
+    Context := tcSelectionAvailable;
+    SaveFiles := sfNone;
+    ProcessInput := piSelection;
+    ProcessOutput := poSelection;
+    ParseMessages := False;
+    CaptureOutput := False;
+    ConsoleHidden := True;
+    Utf8IO := True;
   end;
 
   with (ToolsCollection.Add as TToolItem).ExternalTool do begin
@@ -466,6 +481,7 @@ initialization
     ParseMessages := False;
     CaptureOutput := False;
     ConsoleHidden := True;
+    Utf8IO := True;
   end;
 
   with (ToolsCollection.Add as TToolItem).ExternalTool do begin

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PyScripter GUI translation\n"
-"POT-Creation-Date: 2021-10-12 00:46\n"
+"POT-Creation-Date: 2023-06-04 12:06\n"
 "PO-Revision-Date: 2020-01-23 16:26\n"
 "Last-Translator: Somebody <your.email@address.com>\n"
 "MIME-Version: 1.0\n"
@@ -410,8 +410,10 @@ msgstr ""
 #. RegExpTesterWindow..BGPanel..FGPanel..pnlBackground..dpGroupsView..GroupsView......Text
 #. VariablesWindow..BGPanel..FGPanel..Panel1..VariablesTree......Text
 #. WatchesWindow..BGPanel..FGPanel..Panel1..WatchesView......Text
+#. Programmer's name for it: SyntaxElementFriendlyName_Value
 #: dlgCustomParams.dfm dlgOptionsEditor.dfm dlgToolProperties.dfm
 #: frmRegExpTester.dfm frmVariables.dfm frmWatches.dfm frmVariables.pas
+#: StringResources.pas
 msgid "Value"
 msgstr ""
 
@@ -814,7 +816,8 @@ msgid "Activate selected Python version"
 msgstr ""
 
 #. PythonVersionsDialog..actlPythonVersions..actPVAdd..Caption
-#: dlgPythonVersions.dfm
+#. CommandsDataModule..actlMain..actSynSpellErrorAdd..Caption
+#: dlgPythonVersions.dfm dmCommands.dfm
 msgid "Add"
 msgstr ""
 
@@ -1097,6 +1100,98 @@ msgstr ""
 msgid "Syntax Colors"
 msgstr ""
 
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Caption
+#: dlgSynEditOptions.dfm
+msgid "Keystroke Options"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label5..Caption
+#: dlgSynEditOptions.dfm
+msgid "Command:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label6..Caption
+#: dlgSynEditOptions.dfm
+msgid "Keystroke 2:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label7..Caption
+#: dlgSynEditOptions.dfm
+msgid "Keystroke 1:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..Panel2..KeyList......Caption
+#. ToolProperties..Panel1..TabControl..tabProperties..GroupBox2..Caption
+#: dlgSynEditOptions.dfm dlgToolProperties.dfm
+msgid "Command"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..Panel2..KeyList......Caption
+#: dlgSynEditOptions.dfm
+msgid "Keystroke"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel1..Caption
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label14..Caption
+#: dlgSynEditOptions.dfm
+msgid "Code Sample"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel2..Caption
+#: dlgSynEditOptions.dfm
+msgid "Available Themes"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..btnApplyTheme..Caption
+#: dlgSynEditOptions.dfm
+msgid "Apply Theme"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label11..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Element:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label12..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Foreground Color:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label13..Caption
+#: dlgSynEditOptions.dfm
+msgid "B&ackground Color:"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label15..Caption
+#: dlgSynEditOptions.dfm
+msgid "Editor Syntax Language"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..Caption
+#: dlgSynEditOptions.dfm
+msgid " Text attributes "
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementBold..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Bold"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementItalic..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Italic"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementUnderline..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Underline"
+msgstr ""
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementStrikeout..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Strike Out"
+msgstr ""
+
 #. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel1..ckAutoIndent....Hint
 #: dlgSynEditOptions.dfm
 msgid ""
@@ -1145,7 +1240,7 @@ msgstr ""
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel1..ckWordWrap..Hint
 #: dlgSynEditOptions.dfm
-msgid "Allows the editor accept OLE file drops"
+msgid "Enable wrapping of long lines"
 msgstr ""
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel1..ckWordWrap..Caption
@@ -1347,7 +1442,11 @@ msgstr ""
 msgid "Scroll hint follows mouse"
 msgstr ""
 
-#. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel2..ckShowLigatures..Hint
+#. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel2..ckShowLigatures....Hint
+#: dlgSynEditOptions.dfm
+msgid "Show ligatures (joined font glyphs) when supported by the used font"
+msgstr ""
+
 #. fmEditorOptionsDialog..Panel1..TabControl..Options..gbOptions..GridPanel1..StackPanel2..ckShowLigatures..Caption
 #: dlgSynEditOptions.dfm
 msgid "Show font ligatures"
@@ -1392,37 +1491,6 @@ msgstr ""
 msgid "Block"
 msgstr ""
 
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Caption
-#: dlgSynEditOptions.dfm
-msgid "Keystroke Options"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label5..Caption
-#: dlgSynEditOptions.dfm
-msgid "Command:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label6..Caption
-#: dlgSynEditOptions.dfm
-msgid "Keystroke 2:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..gbKeyStrokes..Label7..Caption
-#: dlgSynEditOptions.dfm
-msgid "Keystroke 1:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..Panel2..KeyList......Caption
-#. ToolProperties..Panel1..TabControl..tabProperties..GroupBox2..Caption
-#: dlgSynEditOptions.dfm dlgToolProperties.dfm
-msgid "Command"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..KeyStrokes..Panel2..KeyList......Caption
-#: dlgSynEditOptions.dfm
-msgid "Keystroke"
-msgstr ""
-
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbRightEdge..Caption
 #: dlgSynEditOptions.dfm
 msgid "Right Edge"
@@ -1439,8 +1507,7 @@ msgid "Edge Column:"
 msgstr ""
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbGutter..Caption
-#. PageSetupDlg..TabControl..tbMargins..Label11..Caption
-#: dlgSynEditOptions.dfm dlgSynPageSetup.dfm
+#: dlgSynEditOptions.dfm
 msgid "Gutter"
 msgstr ""
 
@@ -1524,7 +1591,7 @@ msgstr ""
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbLineSpacing..Label8..Caption
 #: dlgSynEditOptions.dfm
-msgid "Extra Lines:"
+msgid "Extra line spacing (pixels):"
 msgstr ""
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbLineSpacing..Label9..Caption
@@ -1537,76 +1604,13 @@ msgstr ""
 msgid "Active Line Color"
 msgstr ""
 
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel1..Caption
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label14..Caption
-#: dlgSynEditOptions.dfm
-msgid "Code Sample"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel2..Caption
-#: dlgSynEditOptions.dfm
-msgid "Available Themes"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..btnApplyTheme..Caption
-#: dlgSynEditOptions.dfm
-msgid "Apply Theme"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label11..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Element:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label12..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Foreground Color:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label13..Caption
-#: dlgSynEditOptions.dfm
-msgid "B&ackground Color:"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label15..Caption
-#: dlgSynEditOptions.dfm
-msgid "Editor Syntax Language"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..Caption
-#: dlgSynEditOptions.dfm
-msgid " Text attributes "
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementBold..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Bold"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementItalic..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Italic"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementUnderline..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Underline"
-msgstr ""
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementStrikeout..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Strike Out"
-msgstr ""
-
 #. fmEditorOptionsDialog..Panel1..cbApplyToAll..Caption
 #: dlgSynEditOptions.dfm
 msgid "Apply to all editors"
 msgstr ""
 
 #. PageSetupDlg..Caption
-#. DocForm..TBXDock1..TBXToolbar1..TBXItem4..Hint
-#. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem4..Hint
-#: dlgSynPageSetup.dfm frmDocView.dfm frmWebPreview.dfm
+#: dlgSynPageSetup.dfm
 msgid "Page Setup"
 msgstr ""
 
@@ -1748,6 +1752,11 @@ msgstr ""
 msgid "Right Text Indent:"
 msgstr ""
 
+#. PageSetupDlg..TabControl..tbMargins..Label11..Caption
+#: dlgSynPageSetup.dfm
+msgid "Gutter:"
+msgstr ""
+
 #. PageSetupDlg..TabControl..tbMargins..CBMirrorMargins..Caption
 #: dlgSynPageSetup.dfm
 msgid "Mirror margins"
@@ -1837,9 +1846,7 @@ msgid "Underline"
 msgstr ""
 
 #. PrintPreviewDlg..Caption
-#. DocForm..TBXDock1..TBXToolbar1..TBXItem6..Hint
-#. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem6..Hint
-#: dlgSynPrintPreview.dfm frmDocView.dfm frmWebPreview.dfm
+#: dlgSynPrintPreview.dfm
 msgid "Print Preview"
 msgstr ""
 
@@ -3033,7 +3040,7 @@ msgstr ""
 
 #. CommandsDataModule..actlMain..actEditWordWrap..Hint
 #: dmCommands.dfm
-msgid "Turn word wrap on/off"
+msgid "Turn word wrap on/off (incompatible with code folding)"
 msgstr ""
 
 #. CommandsDataModule..actlMain..actSearchGoToDebugLine..Caption
@@ -3286,6 +3293,65 @@ msgstr ""
 msgid "Restart the Language Server"
 msgstr ""
 
+#. CommandsDataModule..actlMain..actSynSpellCheckFile..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckLine..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckSelection..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckWord..Category
+#. CommandsDataModule..actlMain..actSynSpellClearErrors..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckAsYouType..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorAdd..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnoreOnce..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnore..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorDelete..Category
+#: dmCommands.dfm dmCommands.pas
+msgid "Spell Checking"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellCheckFile..Caption
+#: dmCommands.dfm
+msgid "Check File"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellCheckLine..Caption
+#: dmCommands.dfm
+msgid "Check Line"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellCheckSelection..Caption
+#: dmCommands.dfm
+msgid "Check Selection"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellCheckWord..Caption
+#: dmCommands.dfm
+msgid "Check Word"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellClearErrors..Caption
+#: dmCommands.dfm
+msgid "Clear Errors"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellCheckAsYouType..Caption
+#: dmCommands.dfm
+msgid "Check As You Type"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnoreOnce..Caption
+#: dmCommands.dfm
+msgid "Ignore Once"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnore..Caption
+#: dmCommands.dfm
+msgid "Ignore"
+msgstr ""
+
+#. CommandsDataModule..actlMain..actSynSpellErrorDelete..Caption
+#: dmCommands.dfm
+msgid "Delete"
+msgstr ""
+
 #. CommandsDataModule..SynGeneralSyn..DefaultFilter
 #. Programmer's name for it: sGeneralFileFilter
 #: dmCommands.dfm StringResources.pas
@@ -3512,12 +3578,15 @@ msgid "Terminate running tool (unsafe)"
 msgstr ""
 
 #. DisForm..Caption
-#: frmDisassemlyView.dfm
-msgid "Disassembly View"
+#. Programmer's name for it: SDisassemblyTab
+#: frmDisassemlyView.dfm StringResources.pas
+msgid "Disassembly"
 msgstr ""
 
 #. DocForm..Caption
-#: frmDocView.dfm
+#. Programmer's name for it: SyntaxElementFriendlyName_Documentation
+#. Programmer's name for it: SDocTab
+#: frmDocView.dfm StringResources.pas
 msgid "Documentation"
 msgstr ""
 
@@ -3536,8 +3605,9 @@ msgid "Go Forward"
 msgstr ""
 
 #. DocForm..TBXDock1..TBXToolbar1..TBXItem3..Hint
+#. RegExpTesterWindow..BGPanel..FGPanel..StatusBar..lbStatusBar..ImageName
 #. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem3..Hint
-#: frmDocView.dfm frmWebPreview.dfm
+#: frmDocView.dfm frmRegExpTester.dfm frmWebPreview.dfm
 msgid "Stop"
 msgstr ""
 
@@ -3579,23 +3649,29 @@ msgid "Close active tab"
 msgstr ""
 
 #. EditorForm..pmnuEditor..mnSourceCode..Caption
-#: frmEditor.dfm frmEditor.pas
+#: frmEditor.dfm
 msgid "Source Code"
 msgstr ""
 
 #. EditorForm..pmnuEditor..mnSearch..Caption
 #. RegExpTesterWindow..BGPanel..FGPanel..TBXDock..RegExpTesterToolbar..TBXSubmenuItem2..RI_Search..Caption
-#: frmEditor.dfm frmRegExpTester.dfm frmEditor.pas
+#: frmEditor.dfm frmRegExpTester.dfm
 msgid "Search"
 msgstr ""
 
+#. EditorForm..pmnuEditor..SpTBXSubmenuItem1..Caption
+#. PyIDEMainForm..TBXDockTop..MainMenu..EditMenu..mnSpelling..Caption
+#: frmEditor.dfm frmPyIDEMain.dfm
+msgid "Spelling"
+msgstr ""
+
 #. EditorForm..pmnuEditor..mnFold..Caption
-#: frmEditor.dfm frmEditor.pas
+#: frmEditor.dfm
 msgid "Fold"
 msgstr ""
 
 #. EditorForm..pmnuEditor..mnUnfold..Caption
-#: frmEditor.dfm frmEditor.pas
+#: frmEditor.dfm
 msgid "Unfold"
 msgstr ""
 
@@ -5370,6 +5446,16 @@ msgstr ""
 msgid "Open Remote File with SSH"
 msgstr ""
 
+#. PyIDEMainForm..actlStandard..actEditorZoomReset..Caption
+#: frmPyIDEMain.dfm
+msgid "&Reset Zoom"
+msgstr ""
+
+#. PyIDEMainForm..actlStandard..actEditorZoomReset..Hint
+#: frmPyIDEMain.dfm
+msgid "Reset the font size of the editor to its default"
+msgstr ""
+
 #. PythonIIForm..Caption
 #. Create a Python External Run tool which is used in the run menu
 #: frmPythonII.dfm cTools.pas dmCommands.pas
@@ -5857,6 +5943,14 @@ msgid "Advanced Search and replace"
 msgstr ""
 
 #: cTools.pas
+msgid "Format Selection"
+msgstr ""
+
+#: cTools.pas
+msgid "Format selected code using the \"black\" module"
+msgstr ""
+
+#: cTools.pas
 msgid "Sort Selection"
 msgstr ""
 
@@ -6120,6 +6214,18 @@ msgid "Restore open project"
 msgstr ""
 
 #: dmCommands.pas
+msgid "Automatic restart"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Logging enabled"
+msgstr ""
+
+#: dmCommands.pas
+msgid "User Interface content font size in points"
+msgstr ""
+
+#: dmCommands.pas
 msgid "Save files before run"
 msgstr ""
 
@@ -6224,10 +6330,6 @@ msgid "Show executable line marks"
 msgstr ""
 
 #: dmCommands.pas
-msgid "Check syntax as you type"
-msgstr ""
-
-#: dmCommands.pas
 msgid "Default line break format for new files"
 msgstr ""
 
@@ -6275,14 +6377,22 @@ msgstr ""
 msgid "Trim trailing spaces when files are saved"
 msgstr ""
 
+#: dmCommands.pas
+msgid "Track changes bar"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Selection color"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Indentation Guides"
+msgstr ""
+
 #. User editor commands
 #. Programmer's name for it: SEdCmdCodeCompletion
 #: dmCommands.pas StringResources.pas
 msgid "Code Completion"
-msgstr ""
-
-#: dmCommands.pas
-msgid "Special packages"
 msgstr ""
 
 #: dmCommands.pas
@@ -6351,11 +6461,31 @@ msgid "Disable Variables Window with SSH"
 msgstr ""
 
 #: dmCommands.pas frmPyIDEMain.pas
-msgid "Language server"
+msgid "Language Server"
 msgstr ""
 
 #: dmCommands.pas
 msgid "Language server debug output"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Check syntax as you type"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Special packages"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Dictionary language code"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Spell check as you type"
+msgstr ""
+
+#: dmCommands.pas
+msgid "Spell checked syntax tokens"
 msgstr ""
 
 #: dmCommands.pas
@@ -6572,6 +6702,156 @@ msgstr ""
 #. Programmer's name for it: sJSONFileFilter
 #: StringResources.pas
 msgid "JSON Files (*.json;*.ipynb)|*.json;*.ipynb"
+msgstr ""
+
+#. Syntax element friendly names
+#. Programmer's name for it: SyntaxElementFriendlyName_Anchor
+#: StringResources.pas
+msgid "Anchor"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Assembler
+#: StringResources.pas
+msgid "Assembler"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Attribute
+#: StringResources.pas
+msgid "Attribute"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Brackets
+#: StringResources.pas
+msgid "Brackets"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Character
+#: StringResources.pas
+msgid "Character"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Directive
+#: StringResources.pas
+msgid "Directive"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_DocumentDelimiter
+#: StringResources.pas
+msgid "Document Delimiter"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Float
+#: StringResources.pas
+msgid "Float"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Hexadecimal
+#: StringResources.pas
+msgid "Hexadecimal"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Identifier
+#: StringResources.pas
+msgid "Identifier"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_IllegalChar
+#: StringResources.pas
+msgid "Illegal Char"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Key
+#: StringResources.pas
+msgid "Key"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_NonReservedKeyword
+#: StringResources.pas
+msgid "Non-reserved Keyword"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Number
+#: StringResources.pas
+msgid "Number"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_NumericValue
+#: StringResources.pas
+msgid "Numeric Value"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Octal
+#: StringResources.pas
+msgid "Octal"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Preprocessor
+#: StringResources.pas
+msgid "Preprocessor"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_ReservedWord
+#: StringResources.pas
+msgid "Reserved Word"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Section
+#: StringResources.pas
+msgid "Section"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Space
+#: StringResources.pas
+msgid "Space"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_String
+#: StringResources.pas
+msgid "String"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Symbol
+#: StringResources.pas
+msgid "Symbol"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_SyntaxError
+#. Programmer's name for it: SSyntaxError
+#: StringResources.pas
+msgid "Syntax Error"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_System
+#: StringResources.pas
+msgid "System Functions and Variables"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Tag
+#: StringResources.pas
+msgid "Tag"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_Text
+#: StringResources.pas
+msgid "Text"
+msgstr ""
+
+#. Programmer's name for it: SyntaxElementFriendlyName_TextValue
+#: StringResources.pas
+msgid "Text Value"
+msgstr ""
+
+#. Editor scroll hints
+#. Programmer's name for it: sEditorScrollInfo
+#: StringResources.pas
+#, object-pascal-format
+msgid "Top Line: %d"
+msgstr ""
+
+#. Programmer's name for it: sPrintPreviewScrollInfo
+#: StringResources.pas
+#, object-pascal-format
+msgid "Page: %d"
 msgstr ""
 
 #. Needs to be manually updated as new editor commands are added
@@ -7097,7 +7377,7 @@ msgstr ""
 
 #. Programmer's name for it: SEdCmdSelectToBracket
 #: StringResources.pas
-msgid "Select to Bracket"
+msgid "Select Match Bracket"
 msgstr ""
 
 #. Delphi dialogs (from Vcl.Consts)
@@ -7196,7 +7476,7 @@ msgstr ""
 #. Programmer's name for it: SItemsReplaced
 #: StringResources.pas
 #, object-pascal-format
-msgid "%d items found and %d\" items replaced"
+msgid "%d items found and %d items replaced"
 msgstr ""
 
 #. Programmer's name for it: SNotAvailable
@@ -7261,10 +7541,11 @@ msgstr ""
 
 #. Programmer's name for it: SPythonLoadError
 #: StringResources.pas
+#, object-pascal-format
 msgid ""
 "PyScripter could not load a Python engine.\n"
 "**Before** using PyScripter, you must ensure that a version of Python "
-"greater or equal to 3.6 is installed on your machine.\n"
+"greater or equal to %s is installed on your machine.\n"
 "If you do not have one installed, you can download one from http://www."
 "python.org/.\n"
 "\n"
@@ -7548,11 +7829,6 @@ msgstr ""
 msgid "Debugging Aborted"
 msgstr ""
 
-#. Programmer's name for it: SSyntaxError
-#: StringResources.pas
-msgid "Syntax Error"
-msgstr ""
-
 #. Programmer's name for it: StrCertainty
 #: StringResources.pas
 #, object-pascal-format
@@ -7734,11 +8010,6 @@ msgstr ""
 msgid "Disassembly|Disassembly View"
 msgstr ""
 
-#. Programmer's name for it: SDisassemblyTab
-#: StringResources.pas
-msgid "Disassembly"
-msgstr ""
-
 #. Programmer's name for it: SDocumentationHint
 #: StringResources.pas
 msgid "Documentation|Generate HTML documentation"
@@ -7747,11 +8018,6 @@ msgstr ""
 #. Programmer's name for it: SDocumentation
 #: StringResources.pas
 msgid "&Documentation"
-msgstr ""
-
-#. Programmer's name for it: SDocTab
-#: StringResources.pas
-msgid "Doc"
 msgstr ""
 
 #. Programmer's name for it: SWebPreviewHint
@@ -7793,11 +8059,28 @@ msgid ""
 "Please install 'jupyter' first."
 msgstr ""
 
+#. Programmer's name for it: SWebView2Error
+#: StringResources.pas
+msgid ""
+"The WebView2 control creation failed.\n"
+"Please install the WebView2 runtime"
+msgstr ""
+
 #. Programmer's name for it: SExternalProcessRunning
 #: StringResources.pas
 msgid ""
 "An external process is still running.\n"
 "Please terminate it first from the 'Output' window."
+msgstr ""
+
+#. Programmer's name for it: SDictionaryNA
+#: StringResources.pas
+#, object-pascal-format
+msgid ""
+"The dictionary for language code \"%s\" is not available.\n"
+"You can get spell checking dictionaries through the Windows language "
+"settings.\n"
+"You can change the active language through the IDE options dialog."
 msgstr ""
 
 #. Project Manager
@@ -8074,12 +8357,12 @@ msgstr ""
 #. Parameters
 #. Programmer's name for it: SEnterParameterCaption
 #: StringResources.pas
-msgid "Parameter replacement"
+msgid "Enter parameter value"
 msgstr ""
 
 #. Programmer's name for it: SEnterParameterText
 #: StringResources.pas
-msgid "Enter parameter value"
+msgid "Parameter value"
 msgstr ""
 
 #. Programmer's name for it: SParamCircularReference
@@ -8133,6 +8416,12 @@ msgstr ""
 #: StringResources.pas
 #, object-pascal-format
 msgid "Duplicate Modifier \"%s\""
+msgstr ""
+
+#. Tools
+#. Programmer's name for it: SPackageName
+#: StringResources.pas
+msgid "Package Name"
 msgstr ""
 
 #. Refactoring
@@ -8361,6 +8650,47 @@ msgid ""
 "server please switch to Python version %1:s."
 msgstr ""
 
+#. Missing action categories
+#. Programmer's name for it: SActionCategoryFile
+#: StringResources.pas
+msgid "File"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryView
+#: StringResources.pas
+msgid "View"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryRun
+#: StringResources.pas
+msgid "Run"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryProject
+#: StringResources.pas
+msgid "Project"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryDebugWindows
+#: StringResources.pas
+msgid "Debug Windows"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryIDENavigation
+#: StringResources.pas
+msgid "IDE Navigation"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryRefactoring
+#: StringResources.pas
+msgid "Refactoring"
+msgstr ""
+
+#. Programmer's name for it: SActionCategoryInterpreter
+#: StringResources.pas
+msgid "Interpreter"
+msgstr ""
+
 #. Programmer's name for it: SYNS_FriendlyCommentedCode
 #: SynHighlighterPython.pas
 msgid "Commented Code"
@@ -8408,36 +8738,6 @@ msgstr ""
 #. Programmer's name for it: SYNS_FriendlyAttrSystemCmd
 #: SynHighlighterPython.pas
 msgid "System Command"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrDocumentDelimiter
-#: SynHighlighterYAML.pas
-msgid "Document Delimiter"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrKey
-#: SynHighlighterYAML.pas
-msgid "Key"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrNumericValue
-#: SynHighlighterYAML.pas
-msgid "Numeric Value"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrTextValue
-#: SynHighlighterYAML.pas
-msgid "Text Value"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrTag
-#: SynHighlighterYAML.pas
-msgid "Tag"
-msgstr ""
-
-#. Programmer's name for it: SYNS_FriendlyAttrAnchor
-#: SynHighlighterYAML.pas
-msgid "Anchor"
 msgstr ""
 
 #. Python Paths etc.
@@ -8671,6 +8971,10 @@ msgstr ""
 msgid "Toolbars"
 msgstr ""
 
+#. SpTBXCustomizeForm..SpTBXTabControl1..SpTBXTabSheet3..Caption
+msgid "Commands"
+msgstr ""
+
 #. SpTBXCustomizeForm..SpTBXTabControl1..SpTBXTabSheet3..SpTBXLabel3....Caption
 #: SpTBXCustomizerForm.dfm:125
 msgid ""
@@ -8694,12 +8998,6 @@ msgstr ""
 msgid "Icons + Text"
 msgstr ""
 
-#. SpTBXCustomizeForm..SpTBXTabControl1..SpTBXTabSheet1..SpTBXGroupBox1..cbText....Items.Strings
-#: SpTBXCustomizerForm.dfm:177
-msgid "Text"
-msgstr ""
-
-
 #. SpTBXCustomizeForm..SpTBXTabControl1..SpTBXTabSheet1..SpTBXGroupBox1..cbTextLabel..Caption
 #: SpTBXCustomizerForm.dfm:196
 msgid "T&ext Options"
@@ -8710,3 +9008,6 @@ msgstr ""
 msgid "&Visible"
 msgstr ""
 
+#. SpTBXCustomizeForm..ResetButton..Caption
+msgid "&Default Options"
+msgstr ""

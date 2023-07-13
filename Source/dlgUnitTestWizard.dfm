@@ -3,9 +3,6 @@ inherited UnitTestWizard: TUnitTestWizard
   Caption = 'Unit Test Wizard'
   ClientHeight = 491
   ClientWidth = 436
-  ExplicitWidth = 452
-  ExplicitHeight = 530
-  PixelsPerInch = 96
   TextHeight = 15
   object Panel1: TPanel
     Left = 0
@@ -191,7 +188,7 @@ inherited UnitTestWizard: TUnitTestWizard
         CollectionName = 'CodeImages\Keyword'
         Name = 'Keyword'
       end>
-    ImageCollection = CommandsDataModule.icCodeImages
+    ImageCollection = ResourcesDataModule.icCodeImages
     PreserveItems = True
     Left = 56
     Top = 184
@@ -199,16 +196,16 @@ inherited UnitTestWizard: TUnitTestWizard
   object vilImages: TVirtualImageList
     Images = <
       item
-        CollectionIndex = 123
+        CollectionIndex = 126
         CollectionName = 'TreeSelectAll'
         Name = 'TreeSelectAll'
       end
       item
-        CollectionIndex = 122
+        CollectionIndex = 125
         CollectionName = 'TreeDeselectAll'
         Name = 'TreeDeselectAll'
       end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    ImageCollection = ResourcesDataModule.icSVGImages
     PreserveItems = True
     Width = 20
     Height = 20

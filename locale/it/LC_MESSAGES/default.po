@@ -6,21 +6,21 @@
 # Translators:
 # Vincenzo Campanella <vinz65@gmail.com>, 2018
 # Lübbe Onken <luebbe.opensource@gmail.com>, 2018
-# ROBERTO BORIOTTI <roberto.boriotti@canon.it>, 2021
+# ROBERTO BORIOTTI <roberto.boriotti@canon.it>, 2022
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PyScripter GUI translation\n"
-"POT-Creation-Date: 2021-10-12 00:46\n"
+"POT-Creation-Date: 2022-12-06 04:54\n"
 "PO-Revision-Date: 2018-01-24 08:21+0000\n"
-"Last-Translator: ROBERTO BORIOTTI <roberto.boriotti@canon.it>, 2021\n"
+"Last-Translator: ROBERTO BORIOTTI <roberto.boriotti@canon.it>, 2022\n"
 "Language-Team: Italian (https://www.transifex.com/pyscripter/teams/116142/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. AboutBox..Caption
 #: dlgAboutPyScripter.dfm
@@ -829,7 +829,8 @@ msgid "Activate selected Python version"
 msgstr "Attiva versione Python selezionata"
 
 #. PythonVersionsDialog..actlPythonVersions..actPVAdd..Caption
-#: dlgPythonVersions.dfm
+#. CommandsDataModule..actlMain..actSynSpellErrorAdd..Caption
+#: dlgPythonVersions.dfm dmCommands.dfm
 msgid "Add"
 msgstr "Aggiungi"
 
@@ -1465,6 +1466,67 @@ msgstr "Comando"
 msgid "Keystroke"
 msgstr "Combinazione"
 
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel1..Caption
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label14..Caption
+#: dlgSynEditOptions.dfm
+msgid "Code Sample"
+msgstr "Esempio codice"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel2..Caption
+#: dlgSynEditOptions.dfm
+msgid "Available Themes"
+msgstr "Temi disponibili"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..btnApplyTheme..Caption
+#: dlgSynEditOptions.dfm
+msgid "Apply Theme"
+msgstr "Applica tema"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label11..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Element:"
+msgstr "&Elemento:"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label12..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Foreground Color:"
+msgstr "Colore &primo piano:"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label13..Caption
+#: dlgSynEditOptions.dfm
+msgid "B&ackground Color:"
+msgstr "Colore &sfondo:"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label15..Caption
+#: dlgSynEditOptions.dfm
+msgid "Editor Syntax Language"
+msgstr "Linguaggio"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..Caption
+#: dlgSynEditOptions.dfm
+msgid " Text attributes "
+msgstr " Attributi testo "
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementBold..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Bold"
+msgstr "&Grassetto"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementItalic..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Italic"
+msgstr "Cors&ivo"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementUnderline..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Underline"
+msgstr "&Sottolineato"
+
+#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementStrikeout..Caption
+#: dlgSynEditOptions.dfm
+msgid "&Strike Out"
+msgstr "&Elimina"
+
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbRightEdge..Caption
 #: dlgSynEditOptions.dfm
 msgid "Right Edge"
@@ -1566,8 +1628,8 @@ msgstr "Spaziatura riga/tabulazione"
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbLineSpacing..Label8..Caption
 #: dlgSynEditOptions.dfm
-msgid "Extra Lines:"
-msgstr "Righe extra:"
+msgid "Extra line spacing (pixels):"
+msgstr "Interlinea extra (pixel):"
 
 #. fmEditorOptionsDialog..Panel1..TabControl..Display..gbLineSpacing..Label9..Caption
 #: dlgSynEditOptions.dfm
@@ -1579,76 +1641,13 @@ msgstr "Larghezza tabulazione:"
 msgid "Active Line Color"
 msgstr "Colore riga attuale"
 
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel1..Caption
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label14..Caption
-#: dlgSynEditOptions.dfm
-msgid "Code Sample"
-msgstr "Esempio codice"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..SpTBXLabel2..Caption
-#: dlgSynEditOptions.dfm
-msgid "Available Themes"
-msgstr "Temi disponibili"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..ColorThemes..btnApplyTheme..Caption
-#: dlgSynEditOptions.dfm
-msgid "Apply Theme"
-msgstr "Applica tema"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label11..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Element:"
-msgstr "&Elemento:"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label12..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Foreground Color:"
-msgstr "Colore &primo piano:"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label13..Caption
-#: dlgSynEditOptions.dfm
-msgid "B&ackground Color:"
-msgstr "Colore &sfondo:"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..Label15..Caption
-#: dlgSynEditOptions.dfm
-msgid "Editor Syntax Language"
-msgstr "Linguaggio"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..Caption
-#: dlgSynEditOptions.dfm
-msgid " Text attributes "
-msgstr " Attributi testo "
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementBold..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Bold"
-msgstr "&Grassetto"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementItalic..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Italic"
-msgstr "Cors&ivo"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementUnderline..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Underline"
-msgstr "&Sottolineato"
-
-#. fmEditorOptionsDialog..Panel1..TabControl..Color..GroupBox1..cbxElementStrikeout..Caption
-#: dlgSynEditOptions.dfm
-msgid "&Strike Out"
-msgstr "&Elimina"
-
 #. fmEditorOptionsDialog..Panel1..cbApplyToAll..Caption
 #: dlgSynEditOptions.dfm
 msgid "Apply to all editors"
 msgstr "Applica a tutti gli editor"
 
 #. PageSetupDlg..Caption
-#. DocForm..TBXDock1..TBXToolbar1..TBXItem4..Hint
-#. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem4..Hint
-#: dlgSynPageSetup.dfm frmDocView.dfm frmWebPreview.dfm
+#: dlgSynPageSetup.dfm
 msgid "Page Setup"
 msgstr "Impostazioni pagina"
 
@@ -1879,9 +1878,7 @@ msgid "Underline"
 msgstr "Sottolineato"
 
 #. PrintPreviewDlg..Caption
-#. DocForm..TBXDock1..TBXToolbar1..TBXItem6..Hint
-#. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem6..Hint
-#: dlgSynPrintPreview.dfm frmDocView.dfm frmWebPreview.dfm
+#: dlgSynPrintPreview.dfm
 msgid "Print Preview"
 msgstr "Anteprima di stampa"
 
@@ -3343,6 +3340,65 @@ msgstr "Riavvia server &lingua"
 msgid "Restart the Language Server"
 msgstr "Riavvia il server lingua"
 
+#. CommandsDataModule..actlMain..actSynSpellCheckFile..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckLine..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckSelection..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckWord..Category
+#. CommandsDataModule..actlMain..actSynSpellClearErrors..Category
+#. CommandsDataModule..actlMain..actSynSpellCheckAsYouType..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorAdd..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnoreOnce..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnore..Category
+#. CommandsDataModule..actlMain..actSynSpellErrorDelete..Category
+#: dmCommands.dfm
+msgid "Spell Check"
+msgstr "Controllo ortografico"
+
+#. CommandsDataModule..actlMain..actSynSpellCheckFile..Caption
+#: dmCommands.dfm
+msgid "Check File"
+msgstr "Controlla file"
+
+#. CommandsDataModule..actlMain..actSynSpellCheckLine..Caption
+#: dmCommands.dfm
+msgid "Check Line"
+msgstr "Controlla linea"
+
+#. CommandsDataModule..actlMain..actSynSpellCheckSelection..Caption
+#: dmCommands.dfm
+msgid "Check Selection"
+msgstr "Controlla selezione"
+
+#. CommandsDataModule..actlMain..actSynSpellCheckWord..Caption
+#: dmCommands.dfm
+msgid "Check Word"
+msgstr "Controlla parola"
+
+#. CommandsDataModule..actlMain..actSynSpellClearErrors..Caption
+#: dmCommands.dfm
+msgid "Clear Errors"
+msgstr "Cancella errori"
+
+#. CommandsDataModule..actlMain..actSynSpellCheckAsYouType..Caption
+#: dmCommands.dfm
+msgid "Check As You Type"
+msgstr "Controlla durante la digitazione"
+
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnoreOnce..Caption
+#: dmCommands.dfm
+msgid "Ignore Once"
+msgstr "Ignora una volta"
+
+#. CommandsDataModule..actlMain..actSynSpellErrorIgnore..Caption
+#: dmCommands.dfm
+msgid "Ignore"
+msgstr "Ignora"
+
+#. CommandsDataModule..actlMain..actSynSpellErrorDelete..Caption
+#: dmCommands.dfm
+msgid "Delete"
+msgstr "Elimina"
+
 #. CommandsDataModule..SynGeneralSyn..DefaultFilter
 #. Programmer's name for it: sGeneralFileFilter
 #: dmCommands.dfm StringResources.pas
@@ -3593,8 +3649,9 @@ msgid "Go Forward"
 msgstr "Avanti"
 
 #. DocForm..TBXDock1..TBXToolbar1..TBXItem3..Hint
+#. RegExpTesterWindow..BGPanel..FGPanel..StatusBar..lbStatusBar..ImageName
 #. WebPreviewForm..TBXDock1..TBXToolbar1..TBXItem3..Hint
-#: frmDocView.dfm frmWebPreview.dfm
+#: frmDocView.dfm frmRegExpTester.dfm frmWebPreview.dfm
 msgid "Stop"
 msgstr "Ferma"
 
@@ -3645,6 +3702,12 @@ msgstr "Codice sorgente"
 #: frmEditor.dfm frmRegExpTester.dfm frmEditor.pas
 msgid "Search"
 msgstr "Cerca"
+
+#. EditorForm..pmnuEditor..SpTBXSubmenuItem1..Caption
+#. PyIDEMainForm..TBXDockTop..MainMenu..EditMenu..mnSpelling..Caption
+#: frmEditor.dfm frmPyIDEMain.dfm
+msgid "Spelling"
+msgstr "Ortografia"
 
 #. EditorForm..pmnuEditor..mnFold..Caption
 #: frmEditor.dfm frmEditor.pas
@@ -5437,6 +5500,16 @@ msgstr "Apri file remoto"
 msgid "Open Remote File with SSH"
 msgstr "Apri file remoto con SSH"
 
+#. PyIDEMainForm..actlStandard..actEditorZoomReset..Caption
+#: frmPyIDEMain.dfm
+msgid "&Reset Zoom"
+msgstr "&Ripristina zoom"
+
+#. PyIDEMainForm..actlStandard..actEditorZoomReset..Hint
+#: frmPyIDEMain.dfm
+msgid "Reset the font size of the editor to its default"
+msgstr "Ripristina la dimensione del font dell'editor al valore predefinito"
+
 #. PythonIIForm..Caption
 #. Create a Python External Run tool which is used in the run menu
 #: frmPythonII.dfm cTools.pas dmCommands.pas
@@ -5926,6 +5999,14 @@ msgid "Advanced Search and replace"
 msgstr "Cerca e sostituisci avanzato"
 
 #: cTools.pas
+msgid "Format Selection"
+msgstr "Selezione formato"
+
+#: cTools.pas
+msgid "Format selected code using the \"black\" module"
+msgstr "Formatta il codice selezionato usando il modulo \"nero\"."
+
+#: cTools.pas
 msgid "Sort Selection"
 msgstr "Ordina selezione"
 
@@ -6191,6 +6272,14 @@ msgid "Restore open project"
 msgstr "Ripristina progetto aperto"
 
 #: dmCommands.pas
+msgid "Automatic restart"
+msgstr "Riavvio automatico"
+
+#: dmCommands.pas
+msgid "Logging enabled"
+msgstr "Registrazione abilitata"
+
+#: dmCommands.pas
 msgid "Save files before run"
 msgstr "Salva file prima dell'esecuzione"
 
@@ -6295,10 +6384,6 @@ msgid "Show executable line marks"
 msgstr "Visualizza segnaposto righe eseguibili"
 
 #: dmCommands.pas
-msgid "Check syntax as you type"
-msgstr "Verifica sintassi durante la digitazione"
-
-#: dmCommands.pas
 msgid "Default line break format for new files"
 msgstr "Formato predefinito interruzione di riga nuovi file"
 
@@ -6346,15 +6431,23 @@ msgstr "Compatta numeri righe"
 msgid "Trim trailing spaces when files are saved"
 msgstr "Rimuovi spazi iniziali/finali al salvataggio file"
 
+#: dmCommands.pas
+msgid "Track changes bar"
+msgstr "Barra traccia modifiche"
+
+#: dmCommands.pas
+msgid "Selection color"
+msgstr "Colore selezione"
+
+#: dmCommands.pas
+msgid "Indentation Guides"
+msgstr "Guide indentazione"
+
 #. User editor commands
 #. Programmer's name for it: SEdCmdCodeCompletion
 #: dmCommands.pas StringResources.pas
 msgid "Code Completion"
 msgstr "Completamento codice"
-
-#: dmCommands.pas
-msgid "Special packages"
-msgstr "Pacchetti speciali"
 
 #: dmCommands.pas
 msgid "Code completion list size"
@@ -6422,12 +6515,36 @@ msgid "Disable Variables Window with SSH"
 msgstr "Disabilita finestra variabili con SSH"
 
 #: dmCommands.pas frmPyIDEMain.pas
-msgid "Language server"
+msgid "Language Server"
 msgstr "Server lingua"
 
 #: dmCommands.pas
 msgid "Language server debug output"
 msgstr "Output debug server lingua"
+
+#: dmCommands.pas
+msgid "Check syntax as you type"
+msgstr "Verifica sintassi durante la digitazione"
+
+#: dmCommands.pas
+msgid "Special packages"
+msgstr "Pacchetti speciali"
+
+#: dmCommands.pas
+msgid "Spell Checking"
+msgstr "Controllo ortografico"
+
+#: dmCommands.pas
+msgid "Dictionary language code"
+msgstr "Codice lingua dizionario"
+
+#: dmCommands.pas
+msgid "Spell check as you type"
+msgstr "Controllo ortografico durante digitazione"
+
+#: dmCommands.pas
+msgid "Spell checked syntax tokens"
+msgstr "Controllo ortografico token sintassi"
 
 #: dmCommands.pas
 msgid "Modifiers"
@@ -7173,8 +7290,8 @@ msgstr "Parametri completamento"
 
 #. Programmer's name for it: SEdCmdSelectToBracket
 #: StringResources.pas
-msgid "Select to Bracket"
-msgstr "Seleziona fino alla parentesi"
+msgid "Select Match Bracket"
+msgstr "Seleziona corrispondenza parentesi"
 
 #. Delphi dialogs (from Vcl.Consts)
 #. Programmer's name for it: srNone
@@ -7337,20 +7454,21 @@ msgstr "L'interprete Python interno non è disponibile"
 
 #. Programmer's name for it: SPythonLoadError
 #: StringResources.pas
+#, object-pascal-format
 msgid ""
 "PyScripter could not load a Python engine.\n"
-"**Before** using PyScripter, you must ensure that a version of Python greater or equal to 3.6 is installed on your machine.\n"
+"**Before** using PyScripter, you must ensure that a version of Python greater or equal to %s is installed on your machine.\n"
 "If you do not have one installed, you can download one from http://www.python.org/.\n"
 "\n"
 "The 64-bit version of PyScripter (x64) works only on 64-bit Windows **and** with 64-bit versions of Python.\n"
 "The 32-bit version of PyScripter works on both 32-bit and 64-bit Windows with 32-bit versions of Python."
 msgstr ""
 "PyScripter non ha potuto caricare un motore Python.\n"
-"**Prima** di usare PyScripter, assicurati che nel computer sia installata una versione di Python maggiore o uguale alla 3.6.\n"
-"Se non ne hai Python installato, puoi scaricarlo da http://www.python.org/.\n"
+"**Prima** di usare PyScripter, devi assicurarti che nel computer sia installata una versione di Python maggiore o uguale a %s.\n"
+"Se non ne hai una versione di Python installata, puoi scaricarla da  http://www.python.org/.\n"
 "\n"
-"La versione a 64 bit di PyScripter (x64) funziona solo in Windows a 64 bit **e** con versioni di Python a 64 bit.\n"
-"La versione a 32 bit di PyScripter funziona in Windows sia a 32 bit che a 64 bit con versioni di Python a 32 bit."
+"La versione di PyScripter a 64 bit (x64) funziona solo in Windows a 64 bit **e** con versioni a 64 bit di Python.\n"
+"La versionedi PyScripter a 32 bit funziona in Windows sia a 32 bit che a 64 bit con versioni a 32 bit di Python."
 
 #. Programmer's name for it: SPythonFindError
 #: StringResources.pas
@@ -7915,6 +8033,15 @@ msgstr ""
 "Il pachhetto 'jupyter' non è disponibile.\n"
 "Installa il pacchetto 'jupyter'."
 
+#. Programmer's name for it: SWebView2Error
+#: StringResources.pas
+msgid ""
+"The WebView2 control creation failed.\n"
+"Please install the WebView2 runtime"
+msgstr ""
+"La creazione del controllo WebView2 non è riuscita.\n"
+"Installa il runtime di WebView2"
+
 #. Programmer's name for it: SExternalProcessRunning
 #: StringResources.pas
 msgid ""
@@ -7923,6 +8050,18 @@ msgid ""
 msgstr ""
 "È ancora in esecuzione un processo esterno.\n"
 "Termina il processo esterno nella finestra 'Output'."
+
+#. Programmer's name for it: SDictionaryNA
+#: StringResources.pas
+#, object-pascal-format
+msgid ""
+"The dictionary for language code \"%s\" is not available.\n"
+"You can get spell checking dictionaries through the Windows language settings.\n"
+"You can change the active language through the IDE options dialog."
+msgstr ""
+"il dizionario per il codice lingua \"%s\" non è disponibile.\n"
+"Puoi aggiungere dizionari per il controllo ortografico tramite le impostazioni della lingua di Windows.\n"
+"È possibile modificare la lingua attiva tramite la finestra di dialogo delle opzioni IDE."
 
 #. Project Manager
 #. Programmer's name for it: SAskSaveProject

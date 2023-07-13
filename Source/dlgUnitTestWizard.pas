@@ -30,12 +30,14 @@ uses
   Vcl.VirtualImageList,
   TB2Item,
   SpTBXItem,
-  VirtualTrees,
   VirtualTrees.Types,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.AncestorVCL,
+  VirtualTrees.BaseTree,
+  VirtualTrees,
   dlgPyIDEBase;
 
 type
-
 
   TUnitTestWizard = class(TPyIDEDlgBase)
     Panel1: TPanel;
@@ -87,7 +89,7 @@ uses
   JvJVCLUtils,
   SpTBXSkins,
   JvGnugettext,
-  dmCommands,
+  dmResources,
   uCommonFunctions,
   SynEditTypes,
   LspUtils,

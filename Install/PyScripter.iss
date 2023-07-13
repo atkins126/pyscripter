@@ -1,7 +1,7 @@
 ﻿; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 #define MyAppName "PyScripter"
 #ifndef MyAppVersion
-  #define MyAppVersion "4.1.1"
+  #define MyAppVersion "4.2.5"
 #endif
 #ifndef OSPlatform
   #define OSPlatform "x64"
@@ -28,17 +28,19 @@ SolidCompression=true
 ChangesAssociations=true
 UninstallDisplayIcon={app}\{#MyAppName}.exe
 PrivilegesRequired=poweruser
+RestartIfNeededByRun=yes
 AppCopyright=(C) Kiriakos Vlahos
 ;WizardStyle = modern
 #if OSPlatform == "x64"
-ArchitecturesAllowed={#OSPlatform}
-ArchitecturesInstallIn64BitMode={#OSPlatform}
+ArchitecturesAllowed=x64 arm64
+ArchitecturesInstallIn64BitMode=x64 arm64
 #endif
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"; InfoAfterFile: "locale\en\AfterInstallPyScripter-{#OSPlatform}.txt"
 Name: "de"; MessagesFile: "compiler:\Languages\German.isl"; InfoAfterFile: "locale\de\AfterInstallPyScripter-{#OSPlatform}.txt"
 Name: "el"; MessagesFile: "locale\el\Greek.isl"; InfoAfterFile: "locale\el\AfterInstallPyScripter-{#OSPlatform}.txt"
+Name: "es"; MessagesFile: "compiler:\Languages\Spanish.isl"; InfoAfterFile: "locale\es\AfterInstallPyScripter-{#OSPlatform}.txt"
 Name: "fa"; MessagesFile: "locale\fa\Farsi.isl"; InfoAfterFile: "locale\fa\AfterInstallPyScripter-{#OSPlatform}.txt"
 Name: "it"; MessagesFile: "compiler:\Languages\Italian.isl"; InfoAfterFile: "locale\it\AfterInstallPyScripter-{#OSPlatform}.txt"
 Name: "ja"; MessagesFile: "compiler:\Languages\Japanese.isl"; InfoAfterFile: "locale\ja\AfterInstallPyScripter-{#OSPlatform}.txt"
@@ -53,6 +55,8 @@ Source: ..\PyScripter.exe; DestDir: {app}; Flags: ignoreversion
 Source: ..\PyScripter.chm; DestDir: {app}; Flags: ignoreversion
 Source: ..\Source\PyProject.ico; DestDir: {app}
 Source: ..\Lib\rpyc.zip; DestDir: {app}\Lib
+Source: Dependencies\{#OSPlatform}\WebView2Loader.dll; DestDir: {app}; Flags: ignoreversion
+Source: Dependencies\MicrosoftEdgeWebview2Setup.exe; DestDir: "{commonappdata}\PyScripter"; Flags: ignoreversion
 ; localization
 Source: ..\locale\default.pot; DestDir: {app}\locale
 Source: ..\locale\languagecodes.mo; DestDir: {app}\locale
@@ -102,6 +106,10 @@ Source: ..\locale\it\LC_MESSAGES\default.mo; DestDir: {app}\locale\it\LC_MESSAGE
 Source: ..\locale\it\LC_MESSAGES\default.po; DestDir: {app}\locale\it\LC_MESSAGES\
 Source: ..\locale\it\LC_MESSAGES\languages.mo; DestDir: {app}\locale\it\LC_MESSAGES\
 Source: ..\locale\it\LC_MESSAGES\languages.po; DestDir: {app}\locale\it\LC_MESSAGES\
+Source: ..\locale\pl\LC_MESSAGES\default.mo; DestDir: {app}\locale\pl\LC_MESSAGES\
+Source: ..\locale\pl\LC_MESSAGES\default.po; DestDir: {app}\locale\pl\LC_MESSAGES\
+Source: ..\locale\pl\LC_MESSAGES\languages.mo; DestDir: {app}\locale\pl\LC_MESSAGES\
+Source: ..\locale\pl\LC_MESSAGES\languages.po; DestDir: {app}\locale\pl\LC_MESSAGES\
 Source: ..\locale\pt_PT\LC_MESSAGES\default.mo; DestDir: {app}\locale\pt_PT\LC_MESSAGES\
 Source: ..\locale\pt_PT\LC_MESSAGES\default.po; DestDir: {app}\locale\pt_PT\LC_MESSAGES\
 Source: ..\locale\pt_PT\LC_MESSAGES\languages.mo; DestDir: {app}\locale\pt_PT\LC_MESSAGES\
@@ -206,9 +214,11 @@ Source: "..\Styles\Windows10Malibu.vsf"; DestDir: "{commonappdata}\PyScripter\St
 Source: "..\Styles\Windows10SlateGray.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Windows11_Dark.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Windows11_Light.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
+Source: "..\Styles\Windows11_Polar_Dark.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
+Source: "..\Styles\Windows11_Polar_Light.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 Source: "..\Styles\Zircon.vsf"; DestDir: "{commonappdata}\PyScripter\Styles"
 ; Language Server
-Source: "..\Lib\Lsp\jls\jedilsp.exe"; DestDir: "{commonappdata}\PyScripter\Lsp\jls"; 
+Source: "..\Lib\Lsp\jls\jedilsp.exe"; DestDir: "{commonappdata}\PyScripter\Lsp\jls"; Flags: ignoreversion
 Source: "..\Lib\Lsp\jls\run-jedi-language-server.py"; DestDir: "{commonappdata}\PyScripter\Lsp\jls"
 
 [Icons]
@@ -234,16 +244,51 @@ Root: HKLM; Subkey: "Software\Microsoft\Internet Explorer\Main\FeatureControl\FE
 Filename: {app}\PyScripter.exe; Description: {cm:LaunchProgram,PyScripter}; Flags: nowait postinstall skipifsilent
 FileName: "cmd"; Parameters: "/c IF EXIST jedilsp\NUL rmdir jedilsp /s /q"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; Flags: runhidden
 Filename: {commonappdata}\PyScripter\Lsp\jls\JediLsp.exe; Parameters: "-y"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; Flags: runhidden
+Filename: {commonappdata}\PyScripter\MicrosoftEdgeWebview2Setup.exe; Parameters: "/silent /install"; WorkingDir: {commonappdata}\PyScripter; Check:IsWebView2RuntimeNeeded; StatusMsg: "Installing WebView2 runtime..."; Flags: runhidden
+Filename: "cmd"; Parameters: "/c del MicrosoftEdgeWebview2Setup.exe"; WorkingDir: {commonappdata}\PyScripter; Flags: runhidden
 
 [UninstallRun]
-FileName: "cmd";Parameters: "/c IF EXIST jedilsp\NUL rmdir jedilsp /s /q"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; RunOnceId: "DelLspDir"; Flags: runhidden 
+FileName: "cmd";Parameters: "/c IF EXIST jedilsp\NUL rmdir jedilsp /s /q"; WorkingDir: {commonappdata}\PyScripter\Lsp\jls\; RunOnceId: "DelLspDir"; Flags: runhidden
 
 [CustomMessages]
 #include "locale\en\InstallMessages.txt"
 #include "locale\de\InstallMessages.txt"
 #include "locale\el\InstallMessages.txt"
+#include "locale\es\InstallMessages.txt"
 #include "locale\fa\InstallMessages.txt"
 #include "locale\it\InstallMessages.txt"
 #include "locale\ja\InstallMessages.txt"
 
 ;#expr SaveToFile(AddBackslash(SourcePath) + "Preprocessed.iss")
+
+[Code]
+function IsWebView2RuntimeNeeded(): boolean;
+{ See: https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution#detect-if-a-suitable-webview2-runtime-is-already-installed }
+var
+    Version: string;
+    RuntimeNeeded: boolean;
+    VerifyRuntime: boolean;
+begin
+  RuntimeNeeded := true;
+  VerifyRuntime := false;
+
+  { Since we are using an elevated installer I am not checking HKCU }
+  if (IsWin64) then
+  begin
+    if (RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version)) or
+      (RegQueryStringValue(HKEY_CURRENT_USER, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version)) then
+        VerifyRuntime := true;
+  end
+  else
+  begin
+    if (RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version)) or
+      (RegQueryStringValue(HKEY_CURRENT_USER, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Version)) then
+        VerifyRuntime := true;
+  end;
+
+  { Verify the version information }
+  if VerifyRuntime and (Version <> '') and (Version <> '0.0.0.0') then
+    RuntimeNeeded := false;
+
+  Result := RuntimeNeeded;
+end;

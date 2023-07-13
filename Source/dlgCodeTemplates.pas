@@ -60,7 +60,6 @@ type
     lvItems: TListview;
     vilImages: TVirtualImageList;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure edShortcutKeyPress(Sender: TObject; var Key: Char);
     procedure ActionListUpdate(Action: TBasicAction; var Handled: Boolean);
@@ -90,24 +89,17 @@ uses
   Vcl.Themes,
   Vcl.Graphics,
   JvGnugettext,
-  dmCommands,
+  dmResources,
   StringResources,
   uCommonFunctions;
 
 {$R *.dfm}
 
-procedure TCodeTemplates.FormDestroy(Sender: TObject);
-begin
-  CommandsDataModule.ParameterCompletion.Editor := nil;
-  CommandsDataModule.ModifierCompletion.Editor := nil;
-  SynTemplate.Highlighter := nil;
-end;
-
 procedure TCodeTemplates.FormShow(Sender: TObject);
 begin
-  SynTemplate.Highlighter := CommandsDataModule.SynPythonSyn;
-  CommandsDataModule.ParameterCompletion.Editor := SynTemplate;
-  CommandsDataModule.ModifierCompletion.Editor := SynTemplate;
+  SynTemplate.Highlighter := ResourcesDataModule.SynPythonSyn;
+  ResourcesDataModule.ParameterCompletion.Editor := SynTemplate;
+  ResourcesDataModule.ModifierCompletion.Editor := SynTemplate;
   SetItems;
   // Styling
   SynTemplate.Color := StyleServices.GetSystemColor(clWindow);

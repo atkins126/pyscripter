@@ -1,10 +1,10 @@
 {796D9287-1850-46A8-9C28-24E627FBC446} Version=3
 begin jvcsmak.setvariable
-  Caption=Set variable <PyScripterVersion> = 4.1.1
+  Caption=Set variable <PyScripterVersion> = 4.2.5
   Ignore=0
   Varname=PyScripterVersion
   DataType=0
-  Value=4.1.1
+  Value=4.2.5
   Operation=0
   Append=0
   Versionfilename=
@@ -231,7 +231,7 @@ end
     Ignore=0
     ReplaceVars=1
     BatchLineCount=1
-    BatchLine1="C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f C:\Users\kiria\OneDrive\PyScripter\Sertigo_certificate.pfx /p %PW% %AppPath%\PyScripter.exe
+    BatchLine1="C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64\signtool.exe"  sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f C:\Users\kiria\OneDrive\PyScripter\Sertigo_certificate.pfx /p %PW% %AppPath%\PyScripter.exe
   end
   begin command.comment
     Caption=INNO SETUP
@@ -255,7 +255,7 @@ end
     Ignore=0
     ReplaceVars=1
     BatchLineCount=1
-    BatchLine1="C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f C:\Users\kiria\OneDrive\PyScripter\Sertigo_certificate.pfx /p %PW% %AppPath%\Install\Output\PyScripter-%PyScripterVersion%-%OSPlatform%-Setup.exe
+    BatchLine1="C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f C:\Users\kiria\OneDrive\PyScripter\Sertigo_certificate.pfx /p %PW% %AppPath%\Install\Output\PyScripter-%PyScripterVersion%-%OSPlatform%-Setup.exe
   end
   begin command.comment
     Caption=CREATE ZIP DISTRIBUTIONS
@@ -269,6 +269,14 @@ end
     Varname=i
     Value=0
   end
+    begin dialogs.msgbox
+      Caption=Messagebox
+      Ignore=0
+      Text=Install PyScripter x64 to prepare the creation of zip distributions
+      Buttons=[mbOK]
+      Style=0
+      ReturnValue=
+    end
     begin jvcsutils.batchinternal
       Caption=Internal Batch command list
       Ignore=0
@@ -279,7 +287,7 @@ end
     begin dialogs.msgbox
       Caption=Messagebox
       Ignore=0
-      Text=Install PyScripter x64 to prepare the creation of zip distributions
+      Text=Installlation of  PyScripter x64 done.
       Buttons=[mbOK]
       Style=0
       ReturnValue=
@@ -298,23 +306,26 @@ end
     Caption=Internal Batch command list
     Ignore=0
     ReplaceVars=1
-    BatchLineCount=16
+    BatchLineCount=19
     BatchLine1=pushd %AppPath%\Install\Output\PyScripter-%PyScripterVersion%-%OSPlatform%
     BatchLine2=xcopy /q /e /y "c:\Program Files\PyScripter" PyScripter
     BatchLine3=del PyScripter\un*.*
     BatchLine4=del PyScripter\PyScripter.exe
-    BatchLine5=copy %AppPath%\Install\PyScripter.ini PyScripter
-    BatchLine6=copy %AppPath%\PyScripter.exe PyScripter
-    BatchLine7=xcopy /q /e /y c:\ProgramData\PyScripter\ PyScripter  
-    BatchLine8=del PyScripter\Lsp\jls\jedilsp.exe
-    BatchLine9=pushd PyScripter
-    BatchLine10=move Lsp Lib\
-    BatchLine11=popd
-    BatchLine12=IF EXIST ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip del ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip 
-    BatchLine13="c:\Program Files\7-Zip\7z.exe" a ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip PyScripter
-    BatchLine14=cd ..
-    BatchLine15=rmdir /Q /S PyScripter-%PyScripterVersion%-%OSPlatform%  
-    BatchLine16=popd 
+    BatchLine5=del PyScripter\WebView2Loader.dll
+    BatchLine6=copy %AppPath%\Install\PyScripter.ini PyScripter
+    BatchLine7=copy %AppPath%\Install\*.url PyScripter
+    BatchLine8=copy %AppPath%\PyScripter.exe PyScripter
+    BatchLine9=copy %AppPath%\WebView2Loader.dll PyScripter
+    BatchLine10=xcopy /q /e /y c:\ProgramData\PyScripter\ PyScripter  
+    BatchLine11=del PyScripter\Lsp\jls\jedilsp.exe
+    BatchLine12=pushd PyScripter
+    BatchLine13=move Lsp Lib\
+    BatchLine14=popd
+    BatchLine15=IF EXIST ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip del ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip 
+    BatchLine16="c:\Program Files\7-Zip\7z.exe" a ..\PyScripter-%PyScripterVersion%-%OSPlatform%.zip PyScripter
+    BatchLine17=cd ..
+    BatchLine18=rmdir /Q /S PyScripter-%PyScripterVersion%-%OSPlatform%  
+    BatchLine19=popd 
   end
 begin block.end
   Caption=end

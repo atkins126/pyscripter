@@ -33,8 +33,11 @@ uses
   JvComponentBase,
   JvDockControlForm,
   JvAppStorage,
-  VirtualTrees,
   VirtualTrees.Types,
+  VirtualTrees.BaseTree,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.AncestorVCL,
+  VirtualTrees,
   TB2Item,
   SpTBXItem,
   SpTBXControls,
@@ -251,11 +254,13 @@ implementation
 
 uses
   System.Math,
+  System.IOUtils,
   System.Threading,
   JvGNUGetText,
   SynEdit,
-  frmPyIDEMain,
+  dmResources,
   dmCommands,
+  frmPyIDEMain,
   uEditAppIntfs,
   uCommonFunctions,
   LspUtils,
@@ -266,7 +271,7 @@ uses
 procedure TCodeExplorerWindow.UpdateTree(const FileId: string;
       UpdateReason: TCEUpdateReason; NewModuleNode: TModuleCENode);
 begin
-  if csDestroying in CodeExplorerWindow.ComponentState then Exit;
+  if GI_PyIDEServices.IsClosing then Exit;
 
   var ActiveEditor := GI_PyIDEServices.ActiveEditor;
   if ActiveEditor = nil then
@@ -305,7 +310,7 @@ begin
 
     if ShowingActiveEditor and (ActiveEditor <> Editor) then
       // A non active editor's DocSymbols have been updated
-      Exit
+      Exit;
   end;
   FModuleNode := TDocSymbols(ActiveEditor.DocSymbols).ModuleNode as TModuleCENode;
 
@@ -319,16 +324,15 @@ begin
      ExplorerTree.Clear
     else
     begin
-      if ExplorerTree.RootNodeCount <> 1 then
-        ExplorerTree.RootNodeCount := 1;
+      ExplorerTree.RootNodeCount := 1;
       // The same module but changed
       // ReInit the tree with the new data to keep it as close as possible
       if mnAlphaSort.Checked then
         TModuleCENode(FModuleNode).Sort(soAlpha);
       ExplorerTree.BeginUpdate;
       try
-        ExplorerTree.ReinitNode(ExplorerTree.RootNode.FirstChild, True);
-        ExplorerTree.InvalidateToBottom(ExplorerTree.GetFirstVisible);
+        ExplorerTree.ReinitNode(nil, True, True);
+        ExplorerTree.Invalidate;
       finally
         ExplorerTree.EndUpdate;
       end;
@@ -341,7 +345,7 @@ begin
     begin
       ExplorerTree.RootNodeCount := 1;
       ExplorerTree.OffsetXY := FModuleNode.OffsetXY;
-      ExplorerTree.ValidateNode(ExplorerTree.RootNode.FirstChild, True);
+      ExplorerTree.ValidateNode(nil, True);
       //ExplorerTree.Refresh;
     end;
   end;
@@ -371,18 +375,27 @@ procedure TCodeExplorerWindow.ExplorerTreeInitNode(Sender: TBaseVirtualTree;
 var
   CENode: TAbstractCENode;
 begin
-  if ExplorerTree.GetNodeLevel(Node) = 0 then
+  if ParentNode = nil then
     CENode := FModuleNode
   else begin
     var ParentCENode := ParentNode.GetData<TAbstractCENode>;
     CENode := ParentCENode.Children[Node.Index];
   end;
   Node.SetData<TAbstractCENode>(CENode);
+
   if CENode.ChildCount > 0 then
-    if CENode.Expanded = esExpanded then
-      InitialStates := [ivsHasChildren, ivsExpanded]
-    else
-      InitialStates := [ivsHasChildren];
+  begin
+    Include(InitialStates, ivsHasChildren);
+    if (ivsReinit in InitialStates) then
+    begin
+      if vsExpanded in Node.States then
+        CENode.Expanded := esExpanded
+      else
+        CENode.Expanded := esCollapsed;
+    end
+    else if CENode.Expanded = esExpanded then
+      Include(InitialStates, ivsExpanded);
+  end;
   // reverse link from CENode to Tree node
   CENode.fNode := Node;
 end;
@@ -440,9 +453,8 @@ end;
 procedure TCodeExplorerWindow.ExplorerTreeCollapsed(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 begin
-  if Assigned(Node) then begin
+  if Assigned(Node) then
     Node.GetData<TAbstractCENode>.Expanded := esCollapsed;
-  end;
 end;
 
 procedure TCodeExplorerWindow.ExplorerTreeContextPopup(Sender: TObject;
@@ -470,7 +482,8 @@ begin
     //UpdatePopupActions;
     CENode := Node.GetData<TAbstractCENode>;
     mnFindDefinition.Enabled :=
-      (CENode is TCodeElementCENode) and not (CENode is TModuleCENode);
+      (CENode is TCodeElementCENode) and not (CENode is TModuleCENode) or
+      (CENode is TVariableCENode) or (CENode is TImportCENode);
     mnFindReferences.Enabled := mnFindDefinition.Enabled;
     mnHighlight.Enabled := mnFindDefinition.Enabled;
   end else
@@ -489,9 +502,8 @@ end;
 procedure TCodeExplorerWindow.ExplorerTreeExpanded(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 begin
-  if Assigned(Node) then begin
+  if Assigned(Node) then
     Node.GetData<TAbstractCENode>.Expanded := esExpanded;
-  end;
 end;
 
 procedure TCodeExplorerWindow.UpdateModuleNode(const FileId: string; Symbols: TJsonArray);
@@ -526,25 +538,17 @@ begin
         try
           if DocSymbols.Symbols = nil then
           begin
-            if DocSymbols.Destroying then
+            Assert(GetCurrentThreadId = MainThreadId);
+            if FFileId = LFileId then
             begin
-              // DocSymbols is being destroyed
-              Assert(GetCurrentThreadId = MainThreadId);
-              FreeAndNil(DocSymbols.ModuleNode);
-              if FFileId = LFileId then
-              begin
-                ExplorerTree.Clear;
-                FModuleNode := nil;
-              end;
-            end
-            else
-              TThread.ForceQueue(nil, procedure
-                begin
-                    UpdateTree(LFileId, ceuSymbolsChanged, nil);
-                end);
+              ExplorerTree.Clear;
+              FModuleNode := nil;
+            end;
+            FreeAndNil(DocSymbols.ModuleNode);
           end
           else
           begin
+            // Called from a thread <> MainThread
             Symbols := DocSymbols.Symbols; // Will destroyed in UpdateModuleNode
             DocSymbols.Symbols := nil;
             var Task := TTask.Create(procedure
@@ -597,7 +601,8 @@ begin
   begin
     CodeElement := TModuleCENode(FModuleNode).
       GetScopeForLine(Editor.ActiveSynEdit.CaretY);
-    if Assigned(CodeElement) and Assigned(CodeElement.fNode) then begin
+    if Assigned(CodeElement) and Assigned(CodeElement.fNode) then
+    begin
       ExplorerTree.TreeOptions.AnimationOptions :=
         ExplorerTree.TreeOptions.AnimationOptions - [toAnimatedToggle];
       ExplorerTree.OnChange := nil;
@@ -661,8 +666,8 @@ begin
 
     ExplorerTree.BeginUpdate;
     try
-      ExplorerTree.ReinitNode(ExplorerTree.RootNode.FirstChild, True);
-      ExplorerTree.InvalidateToBottom(ExplorerTree.GetFirstVisible);
+      ExplorerTree.ReinitNode(nil, True, True);
+      ExplorerTree.Invalidate;
     finally
       ExplorerTree.EndUpdate;
     end;
@@ -688,7 +693,8 @@ begin
   var Node := ExplorerTree.GetFirstSelected();
   if Assigned(Node) then begin
     var CENode := Node.GetData<TAbstractCENode>;
-    if (CENode is TCodeElementCENode) and not (CENode is TModuleCENode) then
+    if (CENode is TCodeElementCENode) and not (CENode is TModuleCENode) or
+       (CENode is TVariableCENode) or (CENode is TImportCENode) then
     begin
       NavigateToNodeElement(Node);
       PyIDEMainForm.actFindReferencesExecute(Self);
@@ -707,7 +713,9 @@ begin
   var Node := ExplorerTree.GetFirstSelected();
   if Assigned(Node) then begin
     var CENode := Node.GetData<TAbstractCENode>;
-    if (CENode is TCodeElementCENode) and not (CENode is TModuleCENode) then
+    if (CENode is TCodeElementCENode) and not (CENode is TModuleCENode) or
+       (CENode is TVariableCENode) or (CENode is TImportCENode)
+    then
       CommandsDataModule.HighlightWordInActiveEditor(CENode.Name);
   end;
 end;
@@ -843,7 +851,7 @@ var
 begin
   inherited Create;
   FileName := AFileName;
-  FName := XtractFileName(AFileName);
+  FName := TPath.GetFileName(AFileName);
   fExpanded := esExpanded;
   FCodePos := BufferCoord(1, 1);
   FCodeBlock.StartLine := 1;
@@ -1006,6 +1014,8 @@ begin
     else
       AddChild(Node);
   end;
+  if PyIDEOptions.ExplorerInitiallyExpanded and (ChildCount > 0) then
+   fExpanded := esExpanded;
 end;
 
 { TAttributesCENode }
@@ -1091,25 +1101,23 @@ begin
 end;
 
 function TCodeElementCENode.GetScopeForLine(LineNo: integer): TCodeElementCENode;
-// similar to TCodeElement.GetScopeForLine in cPythonSourceScanner
-Var
-  i : integer;
-  Node : TAbstractCENode;
 begin
-  if (LineNo >= CodeBlock.StartLine) and (LineNo <= CodeBlock.EndLine) then begin
+  if InRange(LineNo, CodeBlock.StartLine, CodeBlock.EndLine) then begin
     Result := Self;
     //  try to see whether the line belongs to a child
     if not Assigned(fChildren) then Exit;
-    for i := 0 to fChildren.Count - 1 do begin
-      Node := Children[i];
-      if not (Node is TCodeElementCENode) then continue;
-
-      if (LineNo >= TCodeElementCENode(Node).CodeBlock.StartLine) and
-          (LineNo <= TCodeElementCENode(Node).CodeBlock.EndLine)
-      then begin
+    for var I := 0 to fChildren.Count - 1 do begin
+      var Node := Children[I];
+      if Node is TCodeElementCENode then
+      begin
+        var CENode := TCodeElementCENode(Node);
         // recursive call
-        Result := TCodeElementCENode(Node).GetScopeForLine(LineNo);
-        break;
+        CENode := CENode.GetScopeForLine(LineNo);
+        if Assigned(CENode) then
+        begin
+          Result := CENode;
+          Break;
+        end;
       end;
     end;
   end else

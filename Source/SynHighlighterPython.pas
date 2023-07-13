@@ -260,11 +260,10 @@ resourcestring
 implementation
 
 uses
-  System.StrUtils,
   System.Character,
   System.RegularExpressionsCore,
   SynEditStrConst,
-  uCommonFunctions;
+  SynEditMiscProcs;
 
 function TSynPythonSyn.GetKeyWords(TokenKind: Integer): UnicodeString;
 begin
@@ -1441,27 +1440,6 @@ const
     end;
   end;
 
-  function LeftSpaces: Integer;
-  var
-    p: PWideChar;
-  begin
-    p := PWideChar(CurLine);
-    if Assigned(p) then
-    begin
-      Result := 0;
-      while (p^ >= #1) and (p^ <= #32) do
-      begin
-        if (p^ = #9) then
-          Inc(Result, TabW)
-        else
-          Inc(Result);
-        Inc(p);
-      end;
-    end
-    else
-      Result := 0;
-  end;
-
 begin
   //  Deal with multiline strings
   for Line := FromLine to ToLine do begin
@@ -1492,15 +1470,15 @@ begin
       Continue;
 
     TabW := TabWidth(LinesToScan);
-    Indent := LeftSpaces;
+    Indent := LeftSpaces(CurLine, True, TabW);
 
     // find fold openers
     with BlockOpenerRE.Match(LeftTrimmedLine) do
       if Success then
       begin
-        if GroupValue(1) = 'class' then
+        if Groups[1].Value = 'class' then
           FoldType := ClassDefType
-        else if Pos('def', GroupValue(1)) >= 1 then
+        else if Pos('def', Groups[1].Value) >= 1 then
           FoldType := FunctionDefType
         else
           FoldType := 1;
@@ -1627,17 +1605,17 @@ Var
 begin
   Line := fLineStr;
   Prompt := '';
-  if AnsiStartsStr(fPS1, Line) then
+  if Line.StartsWith(fPS1) then
     Prompt := fPS1
-  else if AnsiStartsStr(fPS2, Line) then
+  else if Line.StartsWith(fPS2) then
     Prompt := fPS2
-  else if AnsiStartsStr(fDbg + fPS1, Line) then
+  else if Line.StartsWith(fDbg + fPS1) then
     Prompt := fDbg + fPS1
-  else if AnsiStartsStr(fDbg + fPS2, Line) then
+  else if Line.StartsWith(fDbg + fPS2) then
     Prompt := fDbg + fPS2
-  else if AnsiStartsStr(fPM + fPS1, Line) then
+  else if Line.StartsWith(fPM + fPS1) then
     Prompt := fPM + fPS1
-  else if AnsiStartsStr(fPM + fPS2, Line) then
+  else if Line.StartsWith(fPM + fPS2) then
     Prompt := fPM + fPS2;
 
   if (Prompt <> '') then begin
@@ -1649,7 +1627,7 @@ begin
        SystemCmdProc
     else
       inherited; //Normal Python syntax
-  end else if AnsiStartsStr('***', Line) then
+  end else if Line.StartsWith('***') then
     BannerProc
   else if fRange = rsTraceback then begin
     TracebackProc;

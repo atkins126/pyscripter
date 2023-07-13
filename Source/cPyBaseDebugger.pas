@@ -100,6 +100,7 @@ type
     fEngineType : TPythonEngineType;
     fCanDoPostMortem : Boolean;
     function SystemTempFolder: string; virtual;
+    function GetInterpreter: Variant; virtual; abstract;
   public
     procedure Initialize; virtual;
     // Create matching debugger
@@ -137,6 +138,7 @@ type
     property EngineType : TPythonEngineType read fEngineType;
     property InterpreterCapabilities : TInterpreterCapabilities read fInterpreterCapabilities;
     property CanDoPostMortem: Boolean read fCanDoPostMortem write fCanDoPostMortem;
+    property PyInteractiveInterpreter : Variant read GetInterpreter;
   end;
 
   TThreadChangeType = (tctAdded, tctRemoved, tctStatusChange);
@@ -219,6 +221,7 @@ implementation
 uses
   System.UITypes,
   System.Contnrs,
+  System.IOUtils,
   Vcl.Dialogs,
   VarPyth,
   JvGnuGettext,
@@ -226,7 +229,6 @@ uses
   StringResources,
   uCommonFunctions,
   cPyControl,
-  cInternalPython,
   cPyDebugger,
   cPyScripterSettings,
   cSSHSupport;
@@ -261,7 +263,7 @@ begin
   if (fPath <> '') then begin
     // Add parent directory of the root of the package first
     if DirIsPythonPackage(fPath) then begin
-      S := ExtractFileDir(GetPackageRootDir(fPath));
+      S := TPath.GetDirectoryName(GetPackageRootDir(fPath));
       if S <> fPath then
         PackageRootAdder :=
           TPythonPathAdder.Create(SysPathAdd, SysPathRemove, S, AutoRemove);
@@ -372,7 +374,7 @@ end;
 
 procedure TBaseNameSpaceItem.CompareToOldItem(OldItem: TBaseNameSpaceItem);
 var
-  i, Index : integer;
+  I, Index : integer;
   Child, OldChild : TBaseNameSpaceItem;
 begin
   if OldItem.GotBufferedValue then begin
@@ -381,9 +383,14 @@ begin
   end;
   if OldItem.GotChildNodes then begin
     GetChildNodes;
-    for i := 0 to ChildCount - 1 do begin
-      Child := ChildNode[i];
-      Index := OldItem.IndexOfChild(Child.Name);
+    for I := 0 to ChildCount - 1 do begin
+      Child := ChildNode[I];
+      if (ObjectType <> 'list') and (ObjectType <> 'tuple') then
+        Index := OldItem.IndexOfChild(Child.Name)
+      else if I < OldItem.ChildCount then
+        Index := I
+      else
+        Index := -1;
       if Index >= 0 then begin
         OldChild := OldItem.ChildNode[Index];
         if OldChild.GotBufferedValue then

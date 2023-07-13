@@ -37,9 +37,9 @@ uses
   JvComponentBase,
   JvDockControlForm,
   JclSynch,
-  JclSysUtils,
   SynEditTypes,
   frmIDEDockWin,
+  uSysUtils,
   uEditAppIntfs,
   cTools;
 
@@ -90,6 +90,7 @@ type
     FNewLine: array [TOutputType] of Boolean;
     FInputString: string;
     FActiveEditorId: string;
+    FRunningTool: string;
     procedure InitializeOutput;
     procedure FinalilzeOuput;
     procedure ProcessOutput(OutType: TOutputType; const Bytes: TBytes; BytesRead: Cardinal);
@@ -107,6 +108,7 @@ type
     procedure FontOrColorUpdated;
     procedure ExecuteTool(Tool : TExternalTool);
     property IsRunning: Boolean read FIsRunning;
+    property RunningTool: string read FRunningTool;
   end;
 
 var
@@ -122,6 +124,7 @@ uses
   JvGnugettext,
   SynEdit,
   StringResources,
+  dmResources,
   dmCommands,
   frmPyIDEMain,
   uCommonFunctions;
@@ -393,7 +396,7 @@ begin
       fRegEx := CompiledRegEx(STracebackFilePosExpr);
       LineNo := 0;
       while LineNo < Length(Strings) do begin
-        if StrIsLeft(PChar(Strings[LineNo]), 'Traceback') then begin
+        if Strings[LineNo].StartsWith('Traceback') then begin
           // Traceback found
           GI_PyIDEServices.Messages.AddMessage('Traceback');
           Inc(LineNo);
@@ -412,7 +415,7 @@ begin
             GI_PyIDEServices.Messages.AddMessage(Strings[LineNo]);
           GI_PyIDEServices.Messages.ShowWindow;
           break;  // finished processing traceback
-        end else if StrIsLeft(PChar(Strings[LineNo]), 'SyntaxError:')
+        end else if Strings[LineNo].StartsWith('SyntaxError:')
           and (LineNo > 2) then
         begin
           // Syntax error found
@@ -522,6 +525,7 @@ begin
 
   InitializeOutput;
   // Execute Process
+  FRunningTool := Tool.Caption;
   var Task := TTask.Create(procedure
     begin
        FIsRunning := True;
@@ -531,6 +535,7 @@ begin
          FIsRunning := False;
        end;
 
+       FRunningTool := '';
        if not GI_PyIDEServices.IsClosing then
          TThread.ForceQueue(nil, procedure
            begin

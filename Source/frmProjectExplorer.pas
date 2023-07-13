@@ -42,6 +42,11 @@ uses
   SpTBXControls,
   JvComponentBase,
   JvDockControlForm,
+  MPCommonObjects,
+  VirtualTrees.Types,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.AncestorVCL,
+  VirtualTrees.BaseTree,
   VirtualTrees,
   frmIDEDockWin,
   cProjectClasses;
@@ -217,6 +222,7 @@ var
 implementation
 
 uses
+  System.IOUtils,
   Vcl.Themes,
   MPDataObject,
   JclShell,
@@ -226,7 +232,7 @@ uses
   JvJVCLUtils,
   JvGnugettext,
   StringResources,
-  dmCommands,
+  dmResources,
   frmPyIDEMain,
   uCommonFunctions,
   dlgImportDirectory,
@@ -235,7 +241,6 @@ uses
   uEditAppIntfs,
   uHighlighterProcs,
   cPyBaseDebugger,
-  cParameters,
   cPyScripterSettings,
   cPyControl,
   cSSHSupport,
@@ -323,15 +328,15 @@ begin
     if Data.ProjectNode is TProjectFilesNode then
     begin
       Application.ProcessMessages;  // to update the display until the dialog appears
-      with CommandsDataModule.dlgFileOpen do begin
+      with ResourcesDataModule.dlgFileOpen do begin
         Title := _(SAddFilesToProject);
         FileName := '';
-        Filter := GetHighlightersFilter(CommandsDataModule.Highlighters) + _(SFilterAllFiles);
+        Filter := ResourcesDataModule.Highlighters.FileFilters + _(SFilterAllFiles);
         Editor := GI_PyIDEServices.ActiveEditor;
         if Assigned(Editor) and (Editor.FileName <> '') and
-          (ExtractFileDir(Editor.FileName) <> '')
+          (TPath.GetDirectoryName(Editor.FileName) <> '')
         then
-          InitialDir := ExtractFileDir(Editor.FileName);
+          InitialDir := TPath.GetDirectoryName(Editor.FileName);
 
         Options := Options + [ofAllowMultiSelect];
         if Execute then begin
@@ -511,7 +516,7 @@ begin
         TSSHFileName.Parse(TProjectFilenode(Data.ProjectNode).FileName, Server, FName)
       then
         DisplayPropDialog(Handle,
-          Parameters.ReplaceInText(TProjectFilenode(Data.ProjectNode).FileName));
+          GI_PyIDEServices.ReplaceParams(TProjectFilenode(Data.ProjectNode).FileName));
     end;
   end;
 end;
@@ -555,15 +560,15 @@ var
   Editor : IEditor;
 begin
   if CanClose then begin
-    with CommandsDataModule.dlgFileOpen do begin
+    with ResourcesDataModule.dlgFileOpen do begin
       Title := _(SOpenProject);
       FileName := '';
       Filter := Format(ProjectFilter, [ProjectDefaultExtension]);
       Editor := GI_PyIDEServices.ActiveEditor;
       if Assigned(Editor) and (Editor.FileName <> '') and
-        (ExtractFileDir(Editor.FileName) <> '')
+        (TPath.GetDirectoryName(Editor.FileName) <> '')
       then
-        InitialDir := ExtractFileDir(Editor.FileName);
+        InitialDir := TPath.GetDirectoryName(Editor.FileName);
 
       if Execute then
         DoOpenProjectFile(FileName);
@@ -689,7 +694,7 @@ begin
     Data := ExplorerTree.GetNodeData(Node);
     if Data.ProjectNode is TProjectFileNode and (TProjectFileNode(Data.ProjectNode).FileName <> '') then
     with PyIDEMainForm do begin
-      DoOpenFile(Parameters.ReplaceInText(TProjectFileNode(Data.ProjectNode).FileName),
+      DoOpenFile(GI_PyIDEServices.ReplaceParams(TProjectFileNode(Data.ProjectNode).FileName),
         '', TabControlIndex(ActiveTabControl));
     end;
   end;
@@ -753,10 +758,10 @@ begin
   if  ExtractFileExt(NewName) = '' then
     NewName := NewName + '.' + ProjectDefaultExtension;
 
-  with CommandsDataModule.dlgFileSave do begin
+  with ResourcesDataModule.dlgFileSave do begin
     if NewName <> '' then begin
-      InitialDir := ExtractFileDir(NewName);
-      FileName := ExtractFileName(NewName);
+      InitialDir := TPath.GetDirectoryName(NewName);
+      FileName := TPath.GetFileName(NewName);
       Title := Format(_(SSaveProjectFileAs), [FileName]);
     end else begin
       InitialDir := '';
@@ -1086,10 +1091,10 @@ begin
     Data := ExplorerTree.GetNodeData(Node);
     if Data.ProjectNode is TProjectFileNode and (TProjectFileNode(Data.ProjectNode).FileName <> '') then
     begin
-      HintText := Parameters.ReplaceInText(TProjectFileNode(Data.ProjectNode).FileName);
+      HintText := GI_PyIDEServices.ReplaceParams(TProjectFileNode(Data.ProjectNode).FileName);
     end else if Data.ProjectNode is TProjectRootNode and (TProjectRootNode(Data.ProjectNode).FileName <> '') then
     begin
-      HintText := Parameters.ReplaceInText(TProjectRootNode(Data.ProjectNode).FileName);
+      HintText := GI_PyIDEServices.ReplaceParams(TProjectRootNode(Data.ProjectNode).FileName);
     end else if Data.ProjectNode is TProjectRunConfiguationNode and
       (TProjectRunConfiguationNode(Data.ProjectNode).RunConfig.Description <> '') then
     begin
@@ -1120,7 +1125,7 @@ begin
   else if Data.ProjectNode is TProjectRunConfiguationNode then
     ImageIndex := 3
   else if Data.ProjectNode is TProjectFileNode then begin
-    FileName := Parameters.ReplaceInText(TProjectFileNode(Data.ProjectNode).FileName);
+    FileName := GI_PyIDEServices.ReplaceParams(TProjectFileNode(Data.ProjectNode).FileName);
     Extension := ExtractFileExt(FileName);
     if Extension <> '' then begin
       Index := FileImageList.IndexOf(Extension);
@@ -1132,7 +1137,7 @@ begin
       end else
         ImageIndex := Integer(FileImageList.Objects[Index]);
       if ImageIndex >= 0 then
-        ImageList := TPyScripterSettings.ShellImages;
+        ImageList := SmallSysImages;
     end;
   end else if Data.ProjectNode is TProjectRunConfiguationsNode then
     ImageIndex := 2;
@@ -1177,7 +1182,7 @@ Var
   Data, ParentData: PNodeDataRec;
 begin
   Data := ExplorerTree.GetNodeData(Node);
-  if ExplorerTree.GetNodeLevel(Node) = 0 then
+  if ParentNode = nil then
     Data.ProjectNode := ActiveProject
   else begin
     ParentData := ExplorerTree.GetNodeData(ParentNode);
@@ -1186,7 +1191,7 @@ begin
   end;
   if Data.ProjectNode.Children.Count > 0 then begin
     InitialStates := [ivsHasChildren];
-    if (not (ivsReInit in InitialStates) and PyIDEOptions.ProjectExporerInitiallyExpanded)
+    if (not (ivsReInit in InitialStates) and PyIDEOptions.ProjectExplorerInitiallyExpanded)
       or (Node.Parent = ExplorerTree.RootNode)
     then
       Include(InitialStates, ivsExpanded);

@@ -12,10 +12,12 @@ unit cPyControl;
 interface
 
 Uses
+  System.SysUtils,
   System.Classes,
   JclNotify,
   JvAppStorage,
   PythonVersions,
+  PythonEngine,
   uEditAppIntfs,
   cPySupportTypes,
   cPyBaseDebugger,
@@ -80,9 +82,12 @@ type
     function GetPythonVersion: TPythonVersion;
     function GetOnPythonVersionChange: TJclNotifyEventBroadcast;
     function AddPathToInternalPythonPath(const Path: string): IInterface;
+    function SafePyEngine: IPyEngineAndGIL;
+    procedure ThreadPythonExec(ExecuteProc : TProc; TerminateProc : TProc = nil;
+      WaitToFinish: Boolean = False; ThreadExecMode : TThreadExecMode = emNewState);
   public
-    const MinPyVersion = '3.6';
-    const MaxPyVersion = '3.10';
+    const MinPyVersion = '3.7';
+    const MaxPyVersion = '3.11'; //PYTHON311
   public
     // ActiveInterpreter and ActiveDebugger are created
     // and destroyed in frmPythonII
@@ -113,6 +118,8 @@ type
     procedure ReadFromAppStorage(AppStorage: TJvCustomAppStorage;
       out SysVersion, InstallPath: string);
     procedure WriteToAppStorage(AppStorage: TJvCustomAppStorage);
+    // Custom versions
+    function RemoveCustomVersion(AIndex: Integer): Boolean;
     // properties and events
     // PythonVersionIndex is the Index of Python version in the PYTHON_KNOWN_VERSIONS array
     property PythonVersion: TPythonVersion read GetPythonVersion;
@@ -153,20 +160,18 @@ implementation
 
 uses
   WinApi.Windows,
-  System.SysUtils,
   System.Contnrs,
   System.UITypes,
+  System.Math,
   Vcl.Forms,
   Vcl.Dialogs,
   JvGnugettext,
   JvJVCLUtils,
-  PythonEngine,
   VarPyth,
   StringResources,
   uCmdLine,
   uCommonFunctions,
   cPyScripterSettings,
-  cParameters,
   cPyDebugger,
   cPyRemoteDebugger,
   cProjectClasses,
@@ -198,7 +203,7 @@ begin
   PrepareRun;
 
   if fRunConfig.WriteOutputToFile then
-    GI_PyInterpreter.StartOutputMirror(Parameters.ReplaceInText(fRunConfig.OutputFileName),
+    GI_PyInterpreter.StartOutputMirror(GI_PyIDEServices.ReplaceParams(fRunConfig.OutputFileName),
       fRunConfig.AppendToFile);
   try
     ActiveDebugger.Debug(fRunConfig, InitStepIn, RunToCursorLine);
@@ -289,16 +294,16 @@ begin
   // first find an optional parameter specifying the expected Python version in the form of -PYTHONXY
   expectedVersion := '';
 
-  if CmdLineReader.readFlag('PYTHON36') then
-    expectedVersion := '3.6'
-  else if CmdLineReader.readFlag('PYTHON37') then
+  if CmdLineReader.readFlag('PYTHON37') then
     expectedVersion := '3.7'
   else if CmdLineReader.readFlag('PYTHON38') then
     expectedVersion := '3.8'
   else if CmdLineReader.readFlag('PYTHON39') then
     expectedVersion := '3.9'
   else if CmdLineReader.readFlag('PYTHON310') then
-    expectedVersion := '3.10';
+    expectedVersion := '3.10'
+  else if CmdLineReader.readFlag('PYTHON311') then
+    expectedVersion := '3.11';
   DllPath := CmdLineReader.readString('PYTHONDLLPATH');
 
   ReadFromAppStorage(GI_PyIDEServices.LocalAppStorage, LastVersion, LastInstallPath);
@@ -325,6 +330,12 @@ begin
         Result := True;
         break;
       end;
+    // if the expectedVersion is not available load the latest registred version
+    if not Result and (Length(fRegPythonVersions) > 0) then
+    begin
+      fPythonVersionIndex := 0;
+      Result := True;
+    end;
   end
   else
   begin
@@ -344,6 +355,12 @@ begin
         CustomPythonVersions[Length(CustomPythonVersions)-1] := Version;
         fPythonVersionIndex := - Length(CustomPythonVersions);
       end;
+    end;
+    // if the loading from path fails load the latest registered version
+    if not Result and (Length(fRegPythonVersions) > 0) then
+    begin
+      fPythonVersionIndex := 0;
+      Result := True;
     end;
   end;
 end;
@@ -373,6 +390,12 @@ begin
   with Editor.SynEdit do begin
     Result := TPyRegExpr.IsExecutableLine(Lines[ALine-1]);
   end;
+end;
+
+procedure TPythonControl.ThreadPythonExec(ExecuteProc, TerminateProc: TProc;
+  WaitToFinish: Boolean; ThreadExecMode: TThreadExecMode);
+begin
+  InternalThreadPythonExec(ExecuteProc, TerminateProc, WaitToFinish, ThreadExecMode);
 end;
 
 procedure TPythonControl.ToggleBreakpoint(Editor : IEditor; ALine: integer;
@@ -408,6 +431,11 @@ begin
     end;
     DoOnBreakpointChanged(Editor, ALine);
   end;
+end;
+
+function TPythonControl.SafePyEngine: IPyEngineAndGIL;
+begin
+  Result := InternalSafePyEngine;
 end;
 
 procedure TPythonControl.SetActiveDebugger(const Value: TPyBaseDebugger);
@@ -706,7 +734,7 @@ begin
     fRunConfig.Assign(ARunConfig);
     // Expand Parameters in filename
     fRunConfig.ScriptName := '';  // to avoid circular substitution
-    fRunConfig.ScriptName := Parameters.ReplaceInText(ARunConfig.ScriptName);
+    fRunConfig.ScriptName := GI_PyIDEServices.ReplaceParams(ARunConfig.ScriptName);
     GI_PyIDEServices.SetRunLastScriptHints(fRunConfig.ScriptName);
   end;
 end;
@@ -721,7 +749,7 @@ begin
   if InitPythonVersions then
     LoadPythonEngine(PythonVersion)
   else
-    StyledMessageDlg(_(SPythonLoadError), mtError, [mbOK], 0);
+    StyledMessageDlg(Format(_(SPythonLoadError), [MinPyVersion]), mtError, [mbOK], 0);
 end;
 
 procedure TPythonControl.LoadPythonEngine(const APythonVersion : TPythonVersion);
@@ -771,7 +799,7 @@ begin
     PyControl.PythonEngineType := PyIDEOptions.PythonEngineType;
 
   end else
-    StyledMessageDlg(_(SPythonLoadError), mtError, [mbOK], 0);
+    StyledMessageDlg(Format(_(SPythonLoadError), [MinPyVersion]), mtError, [mbOK], 0);
 end;
 
 procedure TPythonControl.Run(ARunConfig: TRunConfiguration);
@@ -783,7 +811,7 @@ begin
   PrepareRun;
 
   if fRunConfig.WriteOutputToFile then
-    GI_PyInterpreter.StartOutputMirror(Parameters.ReplaceInText(fRunConfig.OutputFileName),
+    GI_PyInterpreter.StartOutputMirror(GI_PyIDEServices.ReplaceParams(fRunConfig.OutputFileName),
       fRunConfig.AppendToFile);
   try
     ActiveInterpreter.Run(fRunConfig);
@@ -846,6 +874,18 @@ begin
   ActiveSSHServerName  := AppStorage.ReadString('SSHServer');
 end;
 
+function TPythonControl.RemoveCustomVersion(AIndex: Integer): Boolean;
+begin
+   Result := InRange(AIndex, 0, Length(CustomPythonVersions) - 1) and
+     (FPythonVersionIndex <> -(AIndex + 1));  // Cannot delete active custom version
+   if Result then
+   begin
+     Delete(CustomPythonVersions, AIndex, 1);
+     if -FPythonVersionIndex > AIndex then
+       Inc(FPythonVersionIndex);
+   end;
+end;
+
 procedure TPythonControl.WriteToAppStorage(AppStorage: TJvCustomAppStorage);
 Var
   CustomVersions : TStringList;
@@ -870,7 +910,6 @@ begin
 
   AppStorage.WriteString('SSHServer', ActiveSSHServerName);
 end;
-
 
 initialization
   PyControl := TPythonControl.Create(nil);

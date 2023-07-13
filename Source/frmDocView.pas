@@ -14,6 +14,7 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.ActiveX,
+  Winapi.WebView2,
   System.SysUtils,
   System.Variants,
   System.Classes,
@@ -26,44 +27,41 @@ uses
   Vcl.ImgList,
   Vcl.BaseImageCollection,
   Vcl.VirtualImageList,
-  SHDocVw,
+  Vcl.Edge,
   TB2Item,
   TB2Dock,
   TB2Toolbar,
   SpTBXItem,
-  dmCommands,
   uEditAppIntfs;
 
 type
   TDocForm = class(TForm, IEditorView)
-    WebBrowser: TWebBrowser;
     TBXDock1: TSpTBXDock;
     TBXToolbar1: TSpTBXToolbar;
     ToolButtonForward: TSpTBXItem;
     ToolButtonBack: TSpTBXItem;
     TBXSeparatorItem1: TSpTBXSeparatorItem;
     TBXItem3: TSpTBXItem;
-    TBXItem4: TSpTBXItem;
     TBXSeparatorItem2: TSpTBXSeparatorItem;
     TBXItem5: TSpTBXItem;
-    TBXItem6: TSpTBXItem;
     TBXSeparatorItem4: TSpTBXSeparatorItem;
     TBXItem7: TSpTBXItem;
     BrowserImages: TVirtualImageList;
+    WebBrowser: TEdgeBrowser;
+    procedure FormCreate(Sender: TObject);
     procedure ToolButtonBackClick(Sender: TObject);
     procedure ToolButtonForwardClick(Sender: TObject);
     procedure ToolButtonStopClick(Sender: TObject);
-    procedure ToolButtonPageSetupClick(Sender: TObject);
-    procedure ToolButtonPrintPreviewClick(Sender: TObject);
     procedure ToolButtonPrintClick(Sender: TObject);
     procedure ToolButtonSaveClick(Sender: TObject);
-    procedure WebBrowserCommandStateChange(Sender: TObject;
-      Command: Integer; Enable: WordBool);
-    procedure FormDestroy(Sender: TObject);
+    procedure WebBrowserCreateWebViewCompleted(Sender: TCustomEdgeBrowser; AResult:
+        HRESULT);
+    procedure WebBrowserExecuteScript(Sender: TCustomEdgeBrowser; AResult: HRESULT;
+        const AResultObjectAsJson: string);
+    procedure WebBrowserHistoryChanged(Sender: TCustomEdgeBrowser);
   private
     { Private declarations }
-    TempFileName : string;
-    SaveFileName : string;
+    FSaveFileName: string;
     procedure UpdateView(Editor : IEditor);
   public
     { Public declarations }
@@ -88,17 +86,23 @@ type
 implementation
 
 uses
-  JclStrings,
-  JclSysInfo,
+  System.IOUtils,
+  System.NetEncoding,
   JvJVCLUtils,
   JvGnugettext,
   StringResources,
   uCommonFunctions,
-  cPyBaseDebugger,
-  cInternalPython,
-  cPyControl;
+  cPyControl,
+  cPyScripterSettings,
+  dmResources;
 
 {$R *.dfm}
+
+procedure TDocForm.FormCreate(Sender: TObject);
+begin
+  WebBrowser.UserDataFolder := TPath.Combine(TPyScripterSettings.UserDataPath,
+    'WebView2');
+end;
 
 procedure TDocForm.ToolButtonBackClick(Sender: TObject);
 begin
@@ -115,71 +119,65 @@ begin
   WebBrowser.Stop;
 end;
 
-procedure TDocForm.ToolButtonPageSetupClick(Sender: TObject);
-begin
-  WebBrowser.ExecWB(OLECMDID_PAGESETUP, OLECMDEXECOPT_DODEFAULT);
-end;
-
-procedure TDocForm.ToolButtonPrintPreviewClick(Sender: TObject);
-begin
-  WebBrowser.ExecWB(OLECMDID_PRINTPREVIEW, OLECMDEXECOPT_DODEFAULT);
-end;
-
 procedure TDocForm.ToolButtonPrintClick(Sender: TObject);
 begin
-  WebBrowser.ExecWB(OLECMDID_PRINT, OLECMDEXECOPT_DODEFAULT);
+  WebBrowser.ExecuteScript('window.print();');
 end;
 
 procedure TDocForm.ToolButtonSaveClick(Sender: TObject);
-Var
-  V : OleVariant;
 begin
-  V := SaveFileName;
-  try
-    WebBrowser.ExecWB(OLECMDID_SAVEAS, OLECMDEXECOPT_DONTPROMPTUSER, V);
-  except
-  end;
-end;
-
-procedure TDocForm.WebBrowserCommandStateChange(Sender: TObject;
-  Command: Integer; Enable: WordBool);
-begin
-  case Command of
-    CSC_NAVIGATEBACK: ToolButtonBack.Enabled := Enable;
-    CSC_NAVIGATEFORWARD: ToolButtonForward.Enabled := Enable;
-  end;
+  if ResourcesDataModule.GetSaveFileName(FSaveFileName, ResourcesDataModule.SynWebHtmlSyn, 'html') then
+    WebBrowser.ExecuteScript('encodeURIComponent(document.documentElement.outerHTML)');
 end;
 
 procedure TDocForm.UpdateView(Editor: IEditor);
 var
   Py: IPyEngineAndGIL;
   HTML : string;
-  pydoc, HTMLDoc, module : Variant;
+  module : Variant;
   Cursor : IInterface;
 begin
   if not Assigned(Editor) then Exit;
 
-  Py := SafePyEngine;
+  Py := GI_PyControl.SafePyEngine;
   Cursor := WaitCursor;
-  Application.ProcessMessages;
 
   module := PyControl.ActiveInterpreter.ImportModule(Editor);
+  HTML := PyControl.ActiveInterpreter.PyInteractiveInterpreter.htmldoc(module);
 
-  pydoc := PyControl.ActiveInterpreter.EvalCode('__import__("pydoc")');
-  HTMLDoc := pydoc.html;
-  HTML := HTMLDoc.page(pydoc.describe(module), HTMLDoc.document(module));
+  WebBrowser.CreateWebView;
+  while WebBrowser.BrowserControlState in [TEdgeBrowser.TBrowserControlState.None,
+    TEdgeBrowser.TBrowserControlState.Creating]
+  do
+    Application.ProcessMessages;
 
-  SaveFileName := ChangeFileExt(Editor.FileName, '') + '.html';
-  TempFileName := IncludeTrailingPathDelimiter(GetWindowsTempFolder)
-     + ChangeFileExt(Editor.FileTitle, '') + '.html';
-  StringToFile(TempFileName, AnsiString(HTML));
-  WebBrowser.Navigate(TempFileName);
+  WebBrowser.NavigateToString(HTML);
 end;
 
-procedure TDocForm.FormDestroy(Sender: TObject);
+procedure TDocForm.WebBrowserCreateWebViewCompleted(Sender: TCustomEdgeBrowser;
+    AResult: HRESULT);
 begin
-  if (TempFileName <> '') and FileExists(TempFileName) then
-    DeleteFile(TempFileName);
+  if WebBrowser.BrowserControlState <> TEdgeBrowser.TBrowserControlState.Created then
+    StyledMessageDlg(_(SWebView2Error), mtError, [mbOK], 0);
+end;
+
+procedure TDocForm.WebBrowserExecuteScript(Sender: TCustomEdgeBrowser; AResult:
+    HRESULT; const AResultObjectAsJson: string);
+begin
+  if (FSaveFileName <> '') and (AResultObjectAsJson <> 'null') then
+  begin
+    var SL := TSmartPtr.Make(TStringList.Create);
+    SL.Text := TNetEncoding.URL.Decode(AResultObjectAsJson.DeQuotedString('"'));
+    SL.WriteBOM := False;
+    SL.SaveToFile(FSaveFileName, TEncoding.UTF8);
+    FSaveFileName := '';
+  end;
+end;
+
+procedure TDocForm.WebBrowserHistoryChanged(Sender: TCustomEdgeBrowser);
+begin
+  ToolButtonBack.Enabled := WebBrowser.CanGoBack;
+  ToolButtonForward.Enabled := WebBrowser.CanGoForward;
 end;
 
 { TDocView }
@@ -196,7 +194,7 @@ end;
 
 procedure TDocView.GetContextHighlighters(List: TList);
 begin
-  List.Add(CommandsDataModule.SynPythonSyn);
+  List.Add(ResourcesDataModule.SynPythonSyn);
 end;
 
 function TDocView.GetHint: string;

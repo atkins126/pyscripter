@@ -60,6 +60,7 @@ uses
   System.SysUtils,
   System.Win.Registry,
   System.RegularExpressions,
+  System.IOUtils,
   Vcl.Clipbrd,
   Vcl.Dialogs,
   Vcl.FileCtrl,
@@ -68,7 +69,7 @@ uses
   PythonVersions,
   JvGnugettext,
   StringResources,
-  dmCommands,
+  dmResources,
   uEditAppIntfs,
   uCommonFunctions,
   cPyScripterSettings,
@@ -179,7 +180,7 @@ function SelectFile(const ATitle: string): string;
 var
   SaveTitle: string;
 begin
-  with CommandsDataModule.dlgFileOpen do begin
+  with ResourcesDataModule.dlgFileOpen do begin
     Filter := _(SFilterAllFiles);
     FileName := '';
     SaveTitle:= Title;
@@ -403,7 +404,7 @@ begin
     else AName:= ARegKey;
     (* if key exists, read key data *)
     if OpenKeyReadOnly(ExtractFilePath(AName)) then begin
-      AName:= ExtractFileName(ARegKey);
+      AName:= TPath.GetFileName(ARegKey);
       if not GetDataInfo(AName, Info) then
         Info.RegData:= rdUnknown;
       (* convert value to string *)
@@ -464,7 +465,7 @@ begin
       if (Result = '') or (Result[Length(Result)] = ':') then
         Result:= APath
       else Result:= GetShortFileName(ExcludeTrailingPathDelimiter(Result)) +
-                           PathDelim + ExtractFileName(APath);
+                           PathDelim + TPath.GetFileName(APath);
     end;
   end;
 end;
@@ -604,16 +605,16 @@ begin
 
     (* parameters, valid for current Windows configuration *)
     // Python Paths etc.
-    RegisterParameter('Python36Dir', GetPythonDir('3.6'), nil);
     RegisterParameter('Python37Dir', GetPythonDir('3.7'), nil);
     RegisterParameter('Python38Dir', GetPythonDir('3.8'), nil);
     RegisterParameter('Python39Dir', GetPythonDir('3.9'), nil);
     RegisterParameter('Python310Dir', GetPythonDir('3.10'), nil);
-    RegisterParameter('Python36Exe', '$[PYTHON36DIR]python.exe', nil);
+    RegisterParameter('Python311Dir', GetPythonDir('3.11'), nil);
     RegisterParameter('Python37Exe', '$[PYTHON37DIR]python.exe', nil);
     RegisterParameter('Python38Exe', '$[PYTHON38DIR]python.exe', nil);
     RegisterParameter('Python39Exe', '$[PYTHON39DIR]python.exe', nil);
     RegisterParameter('Python310Exe', '$[PYTHON310DIR]python.exe', nil);
+    RegisterParameter('Python311Exe', '$[PYTHON311DIR]python.exe', nil);
     RegisterParameter('PythonDir', _('Directory of active Python version'), GetActivePythonDir);
     RegisterParameter('PythonExe', _('Executable of active Python'), GetActivePythonExe);
     RegisterParameter('PythonwExe', _('Executable of active Python'), GetActivePythonwExe);
@@ -638,7 +639,7 @@ begin
     // register parameter modifiers
     RegisterModifier('Path', _('Path of file'), ExtractFilePath);
     RegisterModifier('Dir', _('Path without delimeter'), ExtractFileDir);
-    RegisterModifier('Name', _('File name'), ExtractFileName);
+    RegisterModifier('Name', _('File name'), TPath.GetFileName);
     RegisterModifier('Ext', _('File extension'), ExtractFileExt);
     RegisterModifier('ExtOnly', _('File extension without "."'), GetFileExt);
     RegisterModifier('NoExt', _('File name without extension'), StripExtension);
@@ -702,16 +703,16 @@ begin
   with Parameters do begin
     (* parameters, valid for current Windows configuration *)
     // Python Paths etc.
-    UnRegisterParameter('Python36Dir');
     UnRegisterParameter('Python37Dir');
     UnRegisterParameter('Python38Dir');
     UnRegisterParameter('Python39Dir');
     UnRegisterParameter('Python310Dir');
-    UnRegisterParameter('Python36Exe');
+    UnRegisterParameter('Python311Dir');
     UnRegisterParameter('Python37Exe');
     UnRegisterParameter('Python38Exe');
     UnRegisterParameter('Python39Exe');
     UnRegisterParameter('Python310Exe');
+    UnRegisterParameter('Python311Exe');
     UnRegisterParameter('PythonDir');
     UnRegisterParameter('PythonExe');
     UnRegisterParameter('PythonwExe');

@@ -1,9 +1,9 @@
 inherited PythonVersionsDialog: TPythonVersionsDialog
   HelpContext = 880
+  BorderStyle = bsSizeToolWin
   Caption = 'Python Versions'
   ClientHeight = 315
   ClientWidth = 630
-  PixelsPerInch = 96
   TextHeight = 15
   object Panel1: TPanel
     Left = 0
@@ -209,7 +209,7 @@ inherited PythonVersionsDialog: TPythonVersionsDialog
         CollectionName = 'Rename'
         Name = 'Rename'
       end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    ImageCollection = ResourcesDataModule.icSVGImages
     PreserveItems = True
     Width = 20
     Height = 20
@@ -217,13 +217,8 @@ inherited PythonVersionsDialog: TPythonVersionsDialog
     Top = 65
   end
   object vilTreeImages: TVirtualImageList
-    Images = <
-      item
-        CollectionIndex = 3
-        CollectionName = 'ArrowRight'
-        Name = 'ArrowRight'
-      end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    Images = <>
+    ImageCollection = ResourcesDataModule.icSVGImages
     Left = 456
     Top = 120
   end

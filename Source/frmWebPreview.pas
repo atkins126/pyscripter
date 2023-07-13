@@ -14,6 +14,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Winapi.ActiveX,
+  Winapi.WebView2,
   System.SysUtils,
   System.Variants,
   System.Classes,
@@ -25,49 +26,54 @@ uses
   Vcl.OleCtrls,
   Vcl.VirtualImageList,
   Vcl.BaseImageCollection,
-  SHDocVw,
   Vcl.ImgList,
+  Vcl.Edge,
   TB2Item,
   TB2Dock,
   TB2Toolbar,
   SpTBXItem,
-  dmCommands,
   uEditAppIntfs,
   cTools;
 
 type
   TWebPreviewForm = class(TForm, IEditorView)
-    WebBrowser: TWebBrowser;
     TBXDock1: TSpTBXDock;
     TBXToolbar1: TSpTBXToolbar;
     ToolButtonForward: TSpTBXItem;
     ToolButtonBack: TSpTBXItem;
     TBXSeparatorItem1: TSpTBXSeparatorItem;
     TBXItem3: TSpTBXItem;
-    TBXItem4: TSpTBXItem;
     TBXSeparatorItem2: TSpTBXSeparatorItem;
     TBXItem5: TSpTBXItem;
-    TBXItem6: TSpTBXItem;
-    TBXSeparatorItem4: TSpTBXSeparatorItem;
     TBXItem7: TSpTBXItem;
     BrowserImages: TVirtualImageList;
+    WebBrowser: TEdgeBrowser;
+    SpTBXSeparatorItem1: TSpTBXSeparatorItem;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure ToolButtonBackClick(Sender: TObject);
     procedure ToolButtonForwardClick(Sender: TObject);
     procedure ToolButtonStopClick(Sender: TObject);
-    procedure ToolButtonPageSetupClick(Sender: TObject);
-    procedure ToolButtonPrintPreviewClick(Sender: TObject);
     procedure ToolButtonPrintClick(Sender: TObject);
     procedure ToolButtonSaveClick(Sender: TObject);
-    procedure WebBrowserCommandStateChange(Sender: TObject;
-      Command: Integer; Enable: WordBool);
+    procedure WebBrowserCreateWebViewCompleted(Sender: TCustomEdgeBrowser; AResult:
+        HRESULT);
+    procedure WebBrowserExecuteScript(Sender: TCustomEdgeBrowser; AResult: HRESULT;
+        const AResultObjectAsJson: string);
+    procedure WebBrowserHistoryChanged(Sender: TCustomEdgeBrowser);
   private
     { Private declarations }
     fEditor: IEditor;
-    SaveFileName : string;
-    ExternalToolPtr : TFunc<TExternalTool>;
     procedure UpdateView(Editor : IEditor);
+  private
+    FSaveFileName: string;
+    class var FExternalTool: TExternalTool;
+    class constructor Create;
+    class destructor Destroy;
   public
     { Public declarations }
+    const JupyterServerCaption = 'Jupyter Server';
+    const JupyterServer = '$[PythonDir-Short]Scripts\Jupyter-notebook.exe';
   end;
 
   TWebPreviewView = class(TInterfacedObject, IEditorViewFactory)
@@ -89,15 +95,52 @@ implementation
 
 uses
   System.UITypes,
-  MSHTML,
+  System.IOUtils,
+  System.NetEncoding,
   JvGnugettext,
   uCommonFunctions,
   StringResources,
   VarPyth,
+  dmResources,
   frmCommandOutput,
-  cParameters;
+  cPyScripterSettings;
 
 {$R *.dfm}
+
+class constructor TWebPreviewForm.Create;
+begin
+  FExternalTool := TExternalTool.Create;
+  with FExternalTool do begin
+    Caption := JupyterServerCaption;
+    Description := Caption;
+    ApplicationName := JupyterServer;
+    Parameters := '--no-browser --NotebookApp.token=""';
+    WorkingDirectory := '$[ActiveDoc-Short-Dir]';
+    SaveFiles := sfActive;
+    Context := tcAlwaysEnabled;
+    ParseTraceback := False;
+    CaptureOutput := True;
+    ConsoleHidden := True;
+  end;
+end;
+
+procedure TWebPreviewForm.FormCreate(Sender: TObject);
+begin
+  WebBrowser.UserDataFolder := TPath.Combine(TPyScripterSettings.UserDataPath,
+    'WebView2');
+end;
+
+class destructor TWebPreviewForm.Destroy;
+begin
+  FExternalTool.Free;
+end;
+
+procedure TWebPreviewForm.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  if OutputWindow.IsRunning and (OutputWindow.RunningTool = FExternalTool.Caption) then
+    OutputWindow.actToolTerminate.Execute;
+end;
 
 procedure TWebPreviewForm.ToolButtonBackClick(Sender: TObject);
 begin
@@ -114,88 +157,68 @@ begin
   WebBrowser.Stop;
 end;
 
-procedure TWebPreviewForm.ToolButtonPageSetupClick(Sender: TObject);
-begin
-  WebBrowser.ExecWB(OLECMDID_PAGESETUP, OLECMDEXECOPT_DODEFAULT);
-end;
-
-procedure TWebPreviewForm.ToolButtonPrintPreviewClick(Sender: TObject);
-begin
-  WebBrowser.ExecWB(OLECMDID_PRINTPREVIEW, OLECMDEXECOPT_DODEFAULT);
-end;
-
 procedure TWebPreviewForm.ToolButtonPrintClick(Sender: TObject);
 begin
-  WebBrowser.ExecWB(OLECMDID_PRINT, OLECMDEXECOPT_DODEFAULT);
+  WebBrowser.ExecuteScript('window.print();');
 end;
 
 procedure TWebPreviewForm.ToolButtonSaveClick(Sender: TObject);
-Var
-  V : OleVariant;
 begin
-  V := SaveFileName;
-  try
-    WebBrowser.ExecWB(OLECMDID_SAVEAS, OLECMDEXECOPT_DONTPROMPTUSER, V);
-  except
-  end;
-end;
-
-procedure TWebPreviewForm.WebBrowserCommandStateChange(Sender: TObject;
-  Command: Integer; Enable: WordBool);
-begin
-  case Command of
-    CSC_NAVIGATEBACK: ToolButtonBack.Enabled := Enable;
-    CSC_NAVIGATEFORWARD: ToolButtonForward.Enabled := Enable;
-  end;
+  if ResourcesDataModule.GetSaveFileName(FSaveFileName, ResourcesDataModule.SynWebHtmlSyn, 'html') then
+    WebBrowser.ExecuteScript('encodeURIComponent(document.documentElement.outerHTML)');
 end;
 
 procedure TWebPreviewForm.UpdateView(Editor: IEditor);
-var
-//  v: Variant;
-  HTMLDocument: IHTMLDocument2;
-  FN : string;
 begin
   fEditor := Editor;
-  WebBrowser.RegisterAsBrowser := True;
-  WebBrowser.Silent := True;
-  WebBrowser.Navigate('about:blank') ;
-  while WebBrowser.ReadyState < READYSTATE_INTERACTIVE do begin
-    Application.ProcessMessages;
-    CheckSynchronize()
-  end;
   if Assigned(Editor.SynEdit.Highlighter) and
-    (Editor.SynEdit.Highlighter = CommandsDataModule.SynJSONSyn) then
+    (Editor.SynEdit.Highlighter = ResourcesDataModule.SynJSONSyn) then
   begin
-    FN := ExtractFileName(Editor.FileName);
+    var FN := TPath.GetFileName(Editor.FileName);
     FN := StringReplace(FN, ' ', '%20', [rfReplaceAll]);
-    TThread.ForceQueue(nil, procedure
-    begin
-      Sleep(2000);
-      WebBrowser.Navigate('http://localhost:8888/notebooks/'+FN);
-    end);
+    WebBrowser.Navigate('http://localhost:8888/notebooks/'+FN);
   end else begin
-    HTMLDocument := WebBrowser.Document as IHTMLDocument2;
-    if not Assigned(HTMLDocument) then Exit;
-
-    //  HTMLDocument.clear;
-    OleVariant(HTMLDocument).Write(Editor.SynEdit.Text);
-    //  v := VarArrayCreate([0, 0], varVariant);
-    //  v[0] := Editor.SynEdit.Text;
-    //  HTMLDocument.Write(PSafeArray(TVarData(v).VArray));
-    HTMLDocument.Close;
+    WebBrowser.CreateWebView;
+    while WebBrowser.BrowserControlState in [TEdgeBrowser.TBrowserControlState.None,
+      TEdgeBrowser.TBrowserControlState.Creating]
+    do
+      Application.ProcessMessages;
+    WebBrowser.NavigateToString(Editor.SynEdit.Text);
   end;
+end;
+
+procedure TWebPreviewForm.WebBrowserCreateWebViewCompleted(Sender:
+    TCustomEdgeBrowser; AResult: HRESULT);
+begin
+  if WebBrowser.BrowserControlState <> TEdgeBrowser.TBrowserControlState.Created then
+    StyledMessageDlg(_(SWebView2Error), mtError, [mbOK], 0);
+end;
+
+procedure TWebPreviewForm.WebBrowserExecuteScript(Sender: TCustomEdgeBrowser;
+    AResult: HRESULT; const AResultObjectAsJson: string);
+begin
+  if (FSaveFileName <> '') and (AResultObjectAsJson <> 'null') then
+  begin
+    var SL := TSmartPtr.Make(TStringList.Create);
+    SL.Text := TNetEncoding.URL.Decode(AResultObjectAsJson.DeQuotedString('"'));
+    SL.WriteBOM := False;
+    SL.SaveToFile(FSaveFileName, TEncoding.UTF8);
+    FSaveFileName := '';
+  end;
+end;
+
+procedure TWebPreviewForm.WebBrowserHistoryChanged(Sender: TCustomEdgeBrowser);
+begin
+  ToolButtonBack.Enabled := WebBrowser.CanGoBack;
+  ToolButtonForward.Enabled := WebBrowser.CanGoForward;
 end;
 
 { TDocView }
 
 function TWebPreviewView.CreateForm(Editor: IEditor; AOwner : TComponent): TCustomForm;
-var
-  ExternalTool : TExternalTool;
 begin
-  ExternalTool := nil;
-
   if Assigned(Editor.SynEdit.Highlighter) and
-    (Editor.SynEdit.Highlighter = CommandsDataModule.SynJSONSyn) then
+    (Editor.SynEdit.Highlighter = ResourcesDataModule.SynJSONSyn) then
   begin
     if Editor.FileName = '' then
       (Editor as IFileCommands).ExecSave;
@@ -203,36 +226,26 @@ begin
       StyledMessageDlg(_(SOnlyJupyterFiles), mtError, [mbOK], 0);
       Abort;
     end;
-    try
-      Import('jupyter');
-    except
+
+    if not FileExists(GI_PyIDEServices.ReplaceParams(TWebPreviewForm.JupyterServer)) then
+    begin
       StyledMessageDlg(_(SNoJupyter), mtError, [mbOK], 0);
       Abort;
     end;
+
     if OutputWindow.IsRunning then begin
       StyledMessageDlg(_(SExternalProcessRunning), mtError, [mbOK], 0);
       Abort;
     end;
 
-    ExternalTool := TExternalTool.Create;
-    with ExternalTool do begin
-      Caption := 'Jupyter Server';
-      Description := Caption;
-      ApplicationName := ('$[PythonDir-Short]Scripts\Jupyter-notebook.exe');
-      Parameters := cParameters.Parameters.ReplaceInText('--no-browser --NotebookApp.token=""');
-      WorkingDirectory := cParameters.Parameters.ReplaceInText('$[ActiveDoc-Short-Dir]');
-      SaveFiles := sfActive;
-      Context := tcAlwaysEnabled;
-      ParseTraceback := False;
-      CaptureOutput := True;
-      ConsoleHidden := True;
+    try
+      OutputWindow.ExecuteTool(TWebPreviewForm.FExternalTool);
+    except
+      Abort;
     end;
-    OutputWindow.ExecuteTool(ExternalTool);
   end;
 
   Result := TWebPreviewForm.Create(AOwner);
-  if Assigned(ExternalTool) then
-    TWebPreviewForm(Result).ExternalToolPtr := TSmartPtr.Make(ExternalTool);
 end;
 
 function TWebPreviewView.GetImageName: string;
@@ -242,10 +255,10 @@ end;
 
 procedure TWebPreviewView.GetContextHighlighters(List: TList);
 begin
-  List.Add(CommandsDataModule.SynWebHtmlSyn);
-  List.Add(CommandsDataModule.SynWebXmlSyn);
-  List.Add(CommandsDataModule.SynWebCssSyn);
-  List.Add(CommandsDataModule.SynJSONSyn);
+  List.Add(ResourcesDataModule.SynWebHtmlSyn);
+  List.Add(ResourcesDataModule.SynWebXmlSyn);
+  List.Add(ResourcesDataModule.SynWebCssSyn);
+  List.Add(ResourcesDataModule.SynJSONSyn);
 end;
 
 function TWebPreviewView.GetHint: string;

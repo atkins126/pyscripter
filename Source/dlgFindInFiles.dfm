@@ -3,22 +3,21 @@ inherited FindInFilesDialog: TFindInFilesDialog
   Top = 114
   HelpContext = 810
   Caption = 'Find in Files Search'
-  ClientHeight = 301
-  ClientWidth = 388
+  ClientHeight = 337
+  ClientWidth = 461
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 15
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 388
-    Height = 301
+    Width = 461
+    Height = 337
     Align = alClient
     TabOrder = 0
     DesignSize = (
-      388
-      301)
+      461
+      337)
     object lblFind: TLabel
       Left = 8
       Top = 9
@@ -29,9 +28,9 @@ inherited FindInFilesDialog: TFindInFilesDialog
     end
     object gbxOptions: TGroupBox
       Left = 10
-      Top = 54
-      Width = 169
-      Height = 106
+      Top = 67
+      Width = 183
+      Height = 129
       Anchors = [akLeft]
       Caption = 'Options'
       TabOrder = 2
@@ -69,10 +68,10 @@ inherited FindInFilesDialog: TFindInFilesDialog
       end
     end
     object gbxWhere: TGroupBox
-      Left = 193
-      Top = 53
-      Width = 188
-      Height = 106
+      Left = 234
+      Top = 66
+      Width = 207
+      Height = 130
       Anchors = [akRight]
       Caption = 'Where'
       TabOrder = 3
@@ -115,14 +114,14 @@ inherited FindInFilesDialog: TFindInFilesDialog
     end
     object gbxDirectories: TGroupBox
       Left = 8
-      Top = 166
-      Width = 374
+      Top = 202
+      Width = 433
       Height = 97
       Anchors = [akLeft, akRight, akBottom]
       Caption = 'Directory Search'
       TabOrder = 1
       DesignSize = (
-        374
+        433
         97)
       object lblMasks: TLabel
         Left = 9
@@ -141,7 +140,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
         FocusControl = cbDirectory
       end
       object btnBrowse: TButton
-        Left = 349
+        Left = 408
         Top = 22
         Width = 20
         Height = 20
@@ -159,7 +158,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
       object cbInclude: TCheckBox
         Left = 96
         Top = 73
-        Width = 200
+        Width = 259
         Height = 21
         Anchors = [akLeft, akTop, akRight]
         Caption = 'Include su&bdirectories'
@@ -168,7 +167,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
       object cbMasks: TComboBox
         Left = 96
         Top = 48
-        Width = 273
+        Width = 332
         Height = 23
         Anchors = [akLeft, akTop, akRight]
         DropDownCount = 15
@@ -177,7 +176,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
       object cbDirectory: TComboBox
         Left = 96
         Top = 21
-        Width = 251
+        Width = 310
         Height = 23
         Anchors = [akLeft, akTop, akRight]
         DropDownCount = 15
@@ -186,8 +185,8 @@ inherited FindInFilesDialog: TFindInFilesDialog
       end
     end
     object btnOK: TButton
-      Left = 146
-      Top = 269
+      Left = 205
+      Top = 305
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -198,8 +197,8 @@ inherited FindInFilesDialog: TFindInFilesDialog
       OnClick = btnOKClick
     end
     object btnCancel: TButton
-      Left = 227
-      Top = 269
+      Left = 286
+      Top = 305
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -209,8 +208,8 @@ inherited FindInFilesDialog: TFindInFilesDialog
       TabOrder = 5
     end
     object btnHelp: TButton
-      Left = 307
-      Top = 269
+      Left = 366
+      Top = 305
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -221,7 +220,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
     object cbText: TComboBox
       Left = 8
       Top = 28
-      Width = 372
+      Width = 433
       Height = 23
       Anchors = [akLeft, akTop, akRight]
       DropDownCount = 15
@@ -235,7 +234,7 @@ inherited FindInFilesDialog: TFindInFilesDialog
         CollectionName = 'OpenFolder'
         Name = 'OpenFolder'
       end>
-    ImageCollection = CommandsDataModule.icSVGImages
+    ImageCollection = ResourcesDataModule.icSVGImages
     PreserveItems = True
     Left = 24
     Top = 248
